@@ -1,65 +1,49 @@
-import { NextFunction, Request, Response } from 'express';
+import { Controller, Param, Body, Get, Post, Put, Delete, HttpCode, UseBefore } from 'routing-controllers';
+import { OpenAPI } from 'routing-controllers-openapi';
 import { CreateUserDto } from '@dtos/users.dto';
 import { User } from '@interfaces/users.interface';
 import userService from '@services/users.service';
+import { validationMiddleware } from '@middlewares/validation.middleware';
 
-class UsersController {
+@Controller()
+export class UsersController {
   public userService = new userService();
 
-  public getUsers = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const findAllUsersData: User[] = await this.userService.findAllUser();
+  @Get('/users')
+  @OpenAPI({ summary: 'Return a list of users' })
+  async getUsers() {
+    const findAllUsersData: User[] = await this.userService.findAllUser();
+    return { data: findAllUsersData, message: 'findAll' };
+  }
 
-      res.status(200).json({ data: findAllUsersData, message: 'findAll' });
-    } catch (error) {
-      next(error);
-    }
-  };
+  @Get('/users/:id')
+  @OpenAPI({ summary: 'Return find a user' })
+  async getUserById(@Param('id') userId: string) {
+    const findOneUserData: User = await this.userService.findUserById(userId);
+    return { data: findOneUserData, message: 'findOne' };
+  }
 
-  public getUserById = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const userId: string = req.params.id;
-      const findOneUserData: User = await this.userService.findUserById(userId);
+  @Post('/users')
+  @HttpCode(201)
+  @UseBefore(validationMiddleware(CreateUserDto, 'body'))
+  @OpenAPI({ summary: 'Create a new user' })
+  async createUser(@Body() userData: CreateUserDto) {
+    const createUserData: User = await this.userService.createUser(userData);
+    return { data: createUserData, message: 'created' };
+  }
 
-      res.status(200).json({ data: findOneUserData, message: 'findOne' });
-    } catch (error) {
-      next(error);
-    }
-  };
+  @Put('/users/:id')
+  @UseBefore(validationMiddleware(CreateUserDto, 'body', true))
+  @OpenAPI({ summary: 'Update a user' })
+  async updateUser(@Param('id') userId: string, @Body() userData: CreateUserDto) {
+    const updateUserData: User = await this.userService.updateUser(userId, userData);
+    return { data: updateUserData, message: 'updated' };
+  }
 
-  public createUser = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const userData: CreateUserDto = req.body;
-      const createUserData: User = await this.userService.createUser(userData);
-
-      res.status(201).json({ data: createUserData, message: 'created' });
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  public updateUser = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const userId: string = req.params.id;
-      const userData: CreateUserDto = req.body;
-      const updateUserData: User = await this.userService.updateUser(userId, userData);
-
-      res.status(200).json({ data: updateUserData, message: 'updated' });
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  public deleteUser = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const userId: string = req.params.id;
-      const deleteUserData: User = await this.userService.deleteUser(userId);
-
-      res.status(200).json({ data: deleteUserData, message: 'deleted' });
-    } catch (error) {
-      next(error);
-    }
-  };
+  @Delete('/users/:id')
+  @OpenAPI({ summary: 'Delete a user' })
+  async deleteUser(@Param('id') userId: string) {
+    const deleteUserData: User = await this.userService.deleteUser(userId);
+    return { data: deleteUserData, message: 'deleted' };
+  }
 }
-
-export default UsersController;

@@ -1,46 +1,40 @@
-import { NextFunction, Request, Response } from 'express';
+import { Response } from 'express';
+import { Controller, Req, Body, Post, UseBefore, HttpCode, Res } from 'routing-controllers';
 import { CreateUserDto } from '@dtos/users.dto';
 import { RequestWithUser } from '@interfaces/auth.interface';
 import { User } from '@interfaces/users.interface';
+import authMiddleware from '@middlewares/auth.middleware';
+import { validationMiddleware } from '@middlewares/validation.middleware';
 import AuthService from '@services/auth.service';
 
-class AuthController {
+@Controller()
+export class AuthController {
   public authService = new AuthService();
 
-  public signUp = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const userData: CreateUserDto = req.body;
-      const signUpUserData: User = await this.authService.signup(userData);
+  @Post('/signup')
+  @UseBefore(validationMiddleware(CreateUserDto, 'body'))
+  @HttpCode(201)
+  async signUp(@Body() userData: CreateUserDto) {
+    const signUpUserData: User = await this.authService.signup(userData);
+    return { data: signUpUserData, message: 'signup' };
+  }
 
-      res.status(201).json({ data: signUpUserData, message: 'signup' });
-    } catch (error) {
-      next(error);
-    }
-  };
+  @Post('/login')
+  @UseBefore(validationMiddleware(CreateUserDto, 'body'))
+  async logIn(@Res() res: Response, @Body() userData: CreateUserDto) {
+    const { cookie, findUser } = await this.authService.login(userData);
 
-  public logIn = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const userData: CreateUserDto = req.body;
-      const { cookie, findUser } = await this.authService.login(userData);
+    res.setHeader('Set-Cookie', [cookie]);
+    return { data: findUser, message: 'login' };
+  }
 
-      res.setHeader('Set-Cookie', [cookie]);
-      res.status(200).json({ data: findUser, message: 'login' });
-    } catch (error) {
-      next(error);
-    }
-  };
+  @Post('/logout')
+  @UseBefore(authMiddleware)
+  async logOut(@Req() req: RequestWithUser, @Res() res: Response) {
+    const userData: User = req.user;
+    const logOutUserData: User = await this.authService.logout(userData);
 
-  public logOut = async (req: RequestWithUser, res: Response, next: NextFunction) => {
-    try {
-      const userData: User = req.user;
-      const logOutUserData: User = await this.authService.logout(userData);
-
-      res.setHeader('Set-Cookie', ['Authorization=; Max-age=0']);
-      res.status(200).json({ data: logOutUserData, message: 'logout' });
-    } catch (error) {
-      next(error);
-    }
-  };
+    res.setHeader('Set-Cookie', ['Authorization=; Max-age=0']);
+    return { data: logOutUserData, message: 'logout' };
+  }
 }
-
-export default AuthController;

@@ -6,7 +6,7 @@ const tagSchema: Schema = new Schema({
     type: String,
     required: true,
     unique: true,
-  }
+  },
 });
 
 const tagModel = model<Tag & Document>('Tag', tagSchema);

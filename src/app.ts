@@ -9,27 +9,30 @@ import helmet from 'helmet';
 import hpp from 'hpp';
 import morgan from 'morgan';
 import { connect, set } from 'mongoose';
-import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import { dbConnection } from '@databases';
-import { Routes } from '@interfaces/routes.interface';
 import errorMiddleware from '@middlewares/error.middleware';
 import { logger, stream } from '@utils/logger';
+import { validationMetadatasToSchemas } from 'class-validator-jsonschema';
+import { getMetadataArgsStorage, useExpressServer } from 'routing-controllers';
+import { routingControllersToSpec } from 'routing-controllers-openapi';
 
 class App {
   public app: express.Application;
   public port: string | number;
   public env: string;
 
-  constructor(routes: Routes[]) {
+  constructor(Controllers: Function[]) {
     this.app = express();
     this.port = process.env.PORT || 3000;
     this.env = process.env.NODE_ENV || 'development';
 
     this.connectToDatabase();
     this.initializeMiddlewares();
-    this.initializeRoutes(routes);
-    this.initializeSwagger();
+    this.initializeRoutes(Controllers);
+    if (this.env !== 'production') {
+      this.initializeSwagger(Controllers);
+    }
     this.initializeErrorHandling();
   }
 
@@ -65,26 +68,48 @@ class App {
     this.app.use(cookieParser());
   }
 
-  private initializeRoutes(routes: Routes[]) {
-    routes.forEach(route => {
-      this.app.use('/', route.router);
+  private initializeRoutes(controllers: Function[]) {
+    useExpressServer(this.app, {
+      cors: {
+        origin: config.get('cors.origin'),
+        credentials: config.get('cors.credentials'),
+      },
+      controllers: controllers,
+      defaultErrorHandler: false,
     });
   }
 
-  private initializeSwagger() {
-    const options = {
-      swaggerDefinition: {
-        info: {
-          title: 'REST API',
-          version: '1.0.0',
-          description: 'Example docs',
-        },
-      },
-      apis: ['swagger.yaml'],
+  private initializeSwagger(controllers: Function[]) {
+    const { defaultMetadataStorage } = require('class-transformer/cjs/storage');
+
+    const schemas = validationMetadatasToSchemas({
+      classTransformerMetadataStorage: defaultMetadataStorage,
+      refPointerPrefix: '#/components/schemas/',
+    });
+
+    const routingControllersOptions = {
+      controllers: controllers,
     };
 
-    const specs = swaggerJSDoc(options);
-    this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+    const storage = getMetadataArgsStorage();
+    const spec = routingControllersToSpec(storage, routingControllersOptions, {
+      components: {
+        schemas,
+        securitySchemes: {
+          basicAuth: {
+            scheme: 'basic',
+            type: 'http',
+          },
+        },
+      },
+      info: {
+        description: 'Generated with `routing-controllers-openapi`',
+        title: 'A sample API',
+        version: '1.0.0',
+      },
+    });
+
+    this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(spec));
   }
 
   private initializeErrorHandling() {
