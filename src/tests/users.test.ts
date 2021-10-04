@@ -1,19 +1,22 @@
+import { UsersController } from '@controllers/users.controller';
 import bcrypt from 'bcrypt';
 import mongoose from 'mongoose';
 import request from 'supertest';
 import App from '@/app';
 import { CreateUserDto } from '@dtos/users.dto';
-import UsersRoute from '@routes/users.route';
+import userModel from '@/models/users.model';
 
 afterAll(async () => {
   await new Promise<void>(resolve => setTimeout(() => resolve(), 500));
 });
 
 describe('Testing Users', () => {
+
+
   describe('[GET] /users', () => {
     it('response fineAll Users', async () => {
-      const usersRoute = new UsersRoute();
-      const users = usersRoute.usersController.userService.users;
+      const app = new App([UsersController]);
+      const users = userModel;
 
       users.find = jest.fn().mockReturnValue([
         {
@@ -34,8 +37,8 @@ describe('Testing Users', () => {
       ]);
 
       (mongoose as any).connect = jest.fn();
-      const app = new App([usersRoute]);
-      return request(app.getServer()).get(`${usersRoute.path}`).expect(200);
+
+      return request(app.getServer()).get(`/users`).expect(200);
     });
   });
 
@@ -43,8 +46,8 @@ describe('Testing Users', () => {
     it('response findOne User', async () => {
       const userId = 'qpwoeiruty';
 
-      const usersRoute = new UsersRoute();
-      const users = usersRoute.usersController.userService.users;
+      const app = new App([UsersController]);
+      const users = userModel;
 
       users.findOne = jest.fn().mockReturnValue({
         _id: 'qpwoeiruty',
@@ -53,20 +56,19 @@ describe('Testing Users', () => {
       });
 
       (mongoose as any).connect = jest.fn();
-      const app = new App([usersRoute]);
-      return request(app.getServer()).get(`${usersRoute.path}/${userId}`).expect(200);
+      return request(app.getServer()).get(`/users/${userId}`).expect(200);
     });
   });
 
   describe('[POST] /users', () => {
+    const app = new App([UsersController]);
+    const users = userModel;
+
     it('response Create User', async () => {
       const userData: CreateUserDto = {
         email: 'test@email.com',
         password: 'q1w2e3r4',
       };
-
-      const usersRoute = new UsersRoute();
-      const users = usersRoute.usersController.userService.users;
 
       users.findOne = jest.fn().mockReturnValue(null);
       users.create = jest.fn().mockReturnValue({
@@ -76,21 +78,20 @@ describe('Testing Users', () => {
       });
 
       (mongoose as any).connect = jest.fn();
-      const app = new App([usersRoute]);
-      return request(app.getServer()).post(`${usersRoute.path}`).send(userData).expect(201);
+      return request(app.getServer()).post(`/users`).send(userData).expect(201);
     });
   });
 
   describe('[PUT] /users/:id', () => {
     it('response Update User', async () => {
+      const app = new App([UsersController]);
+      const users = userModel;
+
       const userId = '60706478aad6c9ad19a31c84';
       const userData: CreateUserDto = {
         email: 'test@email.com',
         password: 'q1w2e3r4',
       };
-
-      const usersRoute = new UsersRoute();
-      const users = usersRoute.usersController.userService.users;
 
       if (userData.email) {
         users.findOne = jest.fn().mockReturnValue({
@@ -107,17 +108,16 @@ describe('Testing Users', () => {
       });
 
       (mongoose as any).connect = jest.fn();
-      const app = new App([usersRoute]);
-      return request(app.getServer()).put(`${usersRoute.path}/${userId}`).send(userData);
+      return request(app.getServer()).put(`/users/${userId}`).send(userData);
     });
   });
 
   describe('[DELETE] /users/:id', () => {
     it('response Delete User', async () => {
-      const userId = '60706478aad6c9ad19a31c84';
+      const app = new App([UsersController]);
+      const users = userModel;
 
-      const usersRoute = new UsersRoute();
-      const users = usersRoute.usersController.userService.users;
+      const userId = '60706478aad6c9ad19a31c84';
 
       users.findByIdAndDelete = jest.fn().mockReturnValue({
         _id: '60706478aad6c9ad19a31c84',
@@ -126,8 +126,7 @@ describe('Testing Users', () => {
       });
 
       (mongoose as any).connect = jest.fn();
-      const app = new App([usersRoute]);
-      return request(app.getServer()).delete(`${usersRoute.path}/${userId}`).expect(200);
+      return request(app.getServer()).delete(`/users/${userId}`).expect(200);
     });
   });
 });

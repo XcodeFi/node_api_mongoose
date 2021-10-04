@@ -2,23 +2,24 @@ import bcrypt from 'bcrypt';
 import mongoose from 'mongoose';
 import request from 'supertest';
 import App from '@/app';
-import { CreateUserDto } from '@dtos/users.dto';
-import AuthRoute from '@routes/auth.route';
+import { AuthController } from '@controllers/auth.controller';
+import { CreateUserDto } from '@/dtos/users.dto';
+import userModel from '@/models/users.model';
 
 afterAll(async () => {
   await new Promise<void>(resolve => setTimeout(() => resolve(), 500));
 });
 
 describe('Testing Auth', () => {
+  const users = userModel;
+  const app = new App([AuthController]);
+
   describe('[POST] /signup', () => {
     it('response should have the Create userData', async () => {
       const userData: CreateUserDto = {
         email: 'test@email.com',
         password: 'q1w2e3r4!',
       };
-
-      const authRoute = new AuthRoute();
-      const users = authRoute.authController.authService.users;
 
       users.findOne = jest.fn().mockReturnValue(null);
       users.create = jest.fn().mockReturnValue({
@@ -28,8 +29,8 @@ describe('Testing Auth', () => {
       });
 
       (mongoose as any).connect = jest.fn();
-      const app = new App([authRoute]);
-      return request(app.getServer()).post(`${authRoute.path}signup`).send(userData);
+
+      return request(app.getServer()).post('/signup').send(userData);
     });
   });
 
@@ -40,9 +41,6 @@ describe('Testing Auth', () => {
         password: 'q1w2e3r4!',
       };
 
-      const authRoute = new AuthRoute();
-      const users = authRoute.authController.authService.users;
-
       users.findOne = jest.fn().mockReturnValue({
         _id: '60706478aad6c9ad19a31c84',
         email: userData.email,
@@ -50,9 +48,8 @@ describe('Testing Auth', () => {
       });
 
       (mongoose as any).connect = jest.fn();
-      const app = new App([authRoute]);
       return request(app.getServer())
-        .post(`${authRoute.path}login`)
+        .post('/login')
         .send(userData)
         .expect('Set-Cookie', /^Authorization=.+/);
     });
