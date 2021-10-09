@@ -34,12 +34,14 @@ class App {
   }
 
   public listen() {
-    this.app.listen(this.port, () => {
-      logger.info(`=================================`);
-      logger.info(`======= ENV: ${this.env} =======`);
-      logger.info(`🚀 App listening on the http://localhost:${this.port}`);
-      logger.info(`=================================`);
-    });
+    if (process.env.NODE_ENV !== 'test') {
+      this.app.listen(this.port, () => {
+        logger.info(`=================================`);
+        logger.info(`======= ENV: ${this.env} =======`);
+        logger.info(`🚀 App listening on the http://localhost:${this.port}`);
+        logger.info(`=================================`);
+      });
+    }
   }
 
   public getServer() {
