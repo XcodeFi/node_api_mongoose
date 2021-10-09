@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
 import { CreateTagDto } from '@dtos/tags.dto';
-import { Tag } from '@interfaces/tags.interface';
 import tagService from '@services/tags.service';
 import { Get, Req, Body, Post, UseBefore, HttpCode, Res, Put, Delete, Param, JsonController } from 'routing-controllers';
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 import { validationMiddleware } from '@/middlewares/validation.middleware';
+import Tag from '@/models/tags.model';
 
 @JsonController()
 export class TagsController {

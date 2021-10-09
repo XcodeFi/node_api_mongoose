@@ -1,10 +1,10 @@
 import { Param, Body, Get, Post, Put, Delete, HttpCode, UseBefore, JsonController, Res } from 'routing-controllers';
 import { OpenAPI } from 'routing-controllers-openapi';
 import { CreateUserDto } from '@dtos/users.dto';
-import { User } from '@interfaces/users.interface';
 import userService from '@services/users.service';
 import { validationMiddleware } from '@middlewares/validation.middleware';
-import { NextFunction, Request, Response } from 'express';
+import { Response } from 'express';
+import User from '@/models/users.model';
 @JsonController()
 export class UsersController {
   public userService = new userService();

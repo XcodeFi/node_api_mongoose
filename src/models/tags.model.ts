@@ -1,5 +1,8 @@
 import { model, Schema, Document } from 'mongoose';
-import { Tag } from '@interfaces/tags.interface';
+export default interface Tag {
+  _id: string;
+  name: string;
+}
 
 const tagSchema: Schema = new Schema({
   name: {
@@ -9,6 +12,4 @@ const tagSchema: Schema = new Schema({
   },
 });
 
-const tagModel = model<Tag & Document>('Tag', tagSchema);
-
-export default tagModel;
+export const TagModel = model<Tag & Document>('Tag', tagSchema);

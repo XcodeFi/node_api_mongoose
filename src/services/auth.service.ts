@@ -4,12 +4,11 @@ import jwt from 'jsonwebtoken';
 import { CreateUserDto } from '@dtos/users.dto';
 import { HttpException } from '@exceptions/HttpException';
 import { DataStoredInToken, TokenData } from '@interfaces/auth.interface';
-import { User } from '@interfaces/users.interface';
-import userModel from '@models/users.model';
+import User, { UserModel } from '@models/users.model';
 import { isEmpty } from '@utils/util';
 
 class AuthService {
-  public users = userModel;
+  public users = UserModel;
 
   public async signup(userData: CreateUserDto): Promise<User> {
     if (isEmpty(userData)) throw new HttpException(400, "You're not userData");

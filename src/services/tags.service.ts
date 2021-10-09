@@ -1,11 +1,10 @@
+import Tag, { TagModel } from '@/models/tags.model';
 import { CreateTagDto } from '@dtos/tags.dto';
 import { HttpException } from '@exceptions/HttpException';
-import { Tag } from '@interfaces/tags.interface';
-import tagModel from '@models/tags.model';
 import { isEmpty } from '@utils/util';
 
 class TagService {
-  public tags = tagModel;
+  public tags = TagModel;
 
   public async findAllTag(): Promise<Tag[]> {
     const tags: Tag[] = await this.tags.find();

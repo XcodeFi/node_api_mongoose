@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 import request from 'supertest';
 import App from '@/app';
 import { CreateUserDto } from '@dtos/users.dto';
-import userModel from '@/models/users.model';
+import { UserModel } from '@/models/users.model';
 
 afterAll(async () => {
   await new Promise<void>(resolve => setTimeout(() => resolve(), 500));
@@ -12,11 +12,11 @@ afterAll(async () => {
 
 describe('Testing Users', () => {
 
+  const app = new App([UsersController]);
+  const users = UserModel;
 
   describe('[GET] /users', () => {
     it('response fineAll Users', async () => {
-      const app = new App([UsersController]);
-      const users = userModel;
 
       users.find = jest.fn().mockReturnValue([
         {
@@ -46,9 +46,6 @@ describe('Testing Users', () => {
     it('response findOne User', async () => {
       const userId = 'qpwoeiruty';
 
-      const app = new App([UsersController]);
-      const users = userModel;
-
       users.findOne = jest.fn().mockReturnValue({
         _id: 'qpwoeiruty',
         email: 'a@email.com',
@@ -61,8 +58,6 @@ describe('Testing Users', () => {
   });
 
   describe('[POST] /users', () => {
-    const app = new App([UsersController]);
-    const users = userModel;
 
     it('response Create User', async () => {
       const userData: CreateUserDto = {
@@ -84,8 +79,6 @@ describe('Testing Users', () => {
 
   describe('[PUT] /users/:id', () => {
     it('response Update User', async () => {
-      const app = new App([UsersController]);
-      const users = userModel;
 
       const userId = '60706478aad6c9ad19a31c84';
       const userData: CreateUserDto = {
@@ -114,9 +107,6 @@ describe('Testing Users', () => {
 
   describe('[DELETE] /users/:id', () => {
     it('response Delete User', async () => {
-      const app = new App([UsersController]);
-      const users = userModel;
-
       const userId = '60706478aad6c9ad19a31c84';
 
       users.findByIdAndDelete = jest.fn().mockReturnValue({

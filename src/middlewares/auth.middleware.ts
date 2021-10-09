@@ -3,7 +3,7 @@ import { NextFunction, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { HttpException } from '@exceptions/HttpException';
 import { DataStoredInToken, RequestWithUser } from '@interfaces/auth.interface';
-import userModel from '@models/users.model';
+import { UserModel } from '@/models/users.model';
 
 const authMiddleware = async (req: RequestWithUser, res: Response, next: NextFunction) => {
   try {
@@ -13,7 +13,7 @@ const authMiddleware = async (req: RequestWithUser, res: Response, next: NextFun
       const secretKey: string = config.get('secretKey');
       const verificationResponse = (await jwt.verify(Authorization, secretKey)) as DataStoredInToken;
       const userId = verificationResponse._id;
-      const findUser = await userModel.findById(userId);
+      const findUser = await UserModel.findById(userId);
 
       if (findUser) {
         req.user = findUser;

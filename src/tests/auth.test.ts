@@ -4,14 +4,14 @@ import request from 'supertest';
 import App from '@/app';
 import { AuthController } from '@controllers/auth.controller';
 import { CreateUserDto } from '@/dtos/users.dto';
-import userModel from '@/models/users.model';
+import { UserModel } from '@/models/users.model';
 
 afterAll(async () => {
   await new Promise<void>(resolve => setTimeout(() => resolve(), 500));
 });
 
 describe('Testing Auth', () => {
-  const users = userModel;
+  const users = UserModel;
   const app = new App([AuthController]);
 
   describe('[POST] /signup', () => {

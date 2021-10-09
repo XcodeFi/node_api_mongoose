@@ -1,10 +1,9 @@
+import { TagModel } from '@models/tags.model';
 import { TagsController } from '@controllers/tags.controller';
-import bcrypt from 'bcrypt';
 import mongoose from 'mongoose';
 import request from 'supertest';
 import App from '@/app';
 import { CreateTagDto } from '@dtos/tags.dto';
-import tagModel from '@/models/tags.model';
 
 afterAll(async () => {
   await new Promise<void>(resolve => setTimeout(() => resolve(), 500));
@@ -12,10 +11,11 @@ afterAll(async () => {
 
 describe('Testing Tags', () => {
 
+  const app = new App([TagsController]);
+  const tags = TagModel;
+
   describe('[GET] /tags', () => {
     it('response fineAll Tags', async () => {
-      const app = new App([TagsController]);
-      const tags = tagModel;
 
       tags.find = jest.fn().mockReturnValue([
         {
@@ -42,9 +42,6 @@ describe('Testing Tags', () => {
     it('response findOne Tag', async () => {
       const tagId = 'qpwoeiruty';
 
-      const app = new App([TagsController]);
-      const tags = tagModel;
-
       tags.findOne = jest.fn().mockReturnValue({
         _id: 'qpwoeiruty',
         name: 'a@email.com',
@@ -56,8 +53,6 @@ describe('Testing Tags', () => {
   });
 
   describe('[POST] /tags', () => {
-    const app = new App([TagsController]);
-    const tags = tagModel;
 
     it('response Create Tag', async () => {
       const tagData: CreateTagDto = {
@@ -77,8 +72,6 @@ describe('Testing Tags', () => {
 
   describe('[PUT] /tags/:id', () => {
     it('response Update Tag', async () => {
-      const app = new App([TagsController]);
-      const tags = tagModel;
 
       const tagId = '60706478aad6c9ad19a31c84';
       const tagData: CreateTagDto = {
@@ -104,8 +97,6 @@ describe('Testing Tags', () => {
 
   describe('[DELETE] /tags/:id', () => {
     it('response Delete Tag', async () => {
-      const app = new App([TagsController]);
-      const tags = tagModel;
 
       const tagId = '60706478aad6c9ad19a31c84';
 
