@@ -6,6 +6,7 @@ import authMiddleware from '@middlewares/auth.middleware';
 import { validationMiddleware } from '@middlewares/validation.middleware';
 import AuthService from '@services/auth.service';
 import User from '@/models/users.model';
+import { SuccessResponse } from '@/utils/ApiResponse';
 
 @JsonController()
 export class AuthController {
@@ -22,10 +23,17 @@ export class AuthController {
   @Post('/login')
   @UseBefore(validationMiddleware(CreateUserDto, 'body'))
   async logIn(@Res() res: Response, @Body() userData: CreateUserDto) {
-    const { cookie, findUser } = await this.authService.login(userData);
+    const { cookie, findUser, token } = await this.authService.login(userData);
 
     res.setHeader('Set-Cookie', [cookie]);
-    return res.status(200).json( { data: findUser, message: 'login'});
+
+    return new SuccessResponse('login', {
+      user:{
+        _id:findUser._id,
+        email:findUser.email
+      },
+      tokens: token
+    }).send(res);
   }
 
   @Post('/logout')

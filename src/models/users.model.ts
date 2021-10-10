@@ -1,6 +1,10 @@
 import { model, Schema, Document } from 'mongoose';
 
-export default interface User {
+
+export const DOCUMENT_NAME = 'User';
+export const COLLECTION_NAME = 'users';
+
+export default interface User extends Document{
   _id: string;
   email: string;
   password: string;
@@ -18,4 +22,4 @@ const userSchema: Schema = new Schema({
   },
 });
 
-export const UserModel = model<User & Document>('User', userSchema);
+export const UserModel = model<User>(DOCUMENT_NAME, userSchema, COLLECTION_NAME);

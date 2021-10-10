@@ -10,7 +10,7 @@ export default interface Blog extends Document {
   text?: string;
   draftText?: string;
   tags: string[];
-  author: User;
+  author: User | string;
   imgUrl?: string;
   blogUrl: string;
   likes?: number;
@@ -20,9 +20,9 @@ export default interface Blog extends Document {
   isPublished: boolean;
   status?: boolean;
   publishedAt?: Date;
-  createdBy?: User;
-  updatedBy?: User;
-  createdAt?: Date;
+  createdBy: User | string;
+  updatedBy?: User | string;
+  createdAt: Date;
   updatedAt?: Date;
 }
 
@@ -124,7 +124,6 @@ const schema = new Schema(
     updatedBy: {
       type: Schema.Types.ObjectId,
       ref: 'User',
-      required: true,
       select: false,
     },
     createdAt: {
@@ -134,7 +133,6 @@ const schema = new Schema(
     },
     updatedAt: {
       type: Date,
-      required: true,
       select: false,
     },
   },
