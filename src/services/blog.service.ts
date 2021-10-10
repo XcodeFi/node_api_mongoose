@@ -33,7 +33,6 @@ class BlogService {
       draftText: blogData.text,
       tags: blogData.tags,
       author: createdBy,
-      
       blogUrl: blogData.blogUrl,
       imgUrl: blogData.imgUrl,
       score: blogData.score,
