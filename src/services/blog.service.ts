@@ -32,15 +32,16 @@ class BlogService {
       description: blogData.description,
       draftText: blogData.text,
       tags: blogData.tags,
-      author: createdBy._id,
+      author: createdBy,
+      
       blogUrl: blogData.blogUrl,
       imgUrl: blogData.imgUrl,
       score: blogData.score,
-      createdBy: createdBy._id,
+      createdBy: createdBy,
       createdAt: new Date()
     } as Blog;
 
-    const createBlogData: Blog = await this.blogs.create(blogData);
+    const createBlogData: Blog = await this.blogs.create(blog);
 
     return createBlogData;
   }
