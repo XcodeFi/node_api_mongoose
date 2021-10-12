@@ -1,3 +1,5 @@
+import { BadRequestResponse } from './../utils/ApiResponse';
+import { BadRequestError } from '@/utils/ApiError';
 import { plainToClass } from 'class-transformer';
 import { validate, ValidationError } from 'class-validator';
 import { RequestHandler } from 'express';
@@ -21,7 +23,8 @@ export const validationMiddleware = (
     validate(plainToClass(type, req[value]), { skipMissingProperties, whitelist, forbidNonWhitelisted }).then((errors: ValidationError[]) => {
       if (errors.length > 0) {
         const message = errors.map(getAllNestedErrors).join(', ');
-        next(new HttpException(400, message));
+        // const errors = errors.map(getAllNestedErrors);
+        next(new BadRequestResponse(message));
       } else {
         next();
       }
