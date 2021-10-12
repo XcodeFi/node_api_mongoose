@@ -40,7 +40,7 @@ class App {
     this.app.listen(this.port, () => {
       logger.info(`=================================`);
       logger.info(`======= ENV: ${this.env} =======`);
-      logger.info(`🚀 App listening on the http://localhost:${this.port}`);
+      logger.info(`🚀 App listening on the http://localhost:${this.port}/api-docs`);
       logger.info(`=================================`);
     });
   }

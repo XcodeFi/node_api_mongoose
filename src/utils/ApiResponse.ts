@@ -6,6 +6,7 @@ enum StatusCode {
   FAILURE = '10001',
   RETRY = '10002',
   INVALID_ACCESS_TOKEN = '10003',
+  UN_PROCESSABLE = '10004',
 }
 
 enum ResponseStatus {
@@ -14,6 +15,7 @@ enum ResponseStatus {
   UNAUTHORIZED = 401,
   FORBIDDEN = 403,
   NOT_FOUND = 404,
+  UN_PROCESSABLE = 422,
   INTERNAL_ERROR = 500,
 }
 
@@ -21,7 +23,7 @@ abstract class ApiResponse {
   constructor(
     protected statusCode: StatusCode,
     protected status: ResponseStatus,
-    protected message: string,
+    protected message: string
   ) {}
 
   protected prepare<T extends ApiResponse>(res: Response, response: T): Response {
@@ -64,6 +66,12 @@ export class NotFoundResponse extends ApiResponse {
 export class ForbiddenResponse extends ApiResponse {
   constructor(message = 'Forbidden') {
     super(StatusCode.FAILURE, ResponseStatus.FORBIDDEN, message);
+  }
+}
+
+export class UnprocessableResponse extends ApiResponse {
+  constructor(message = 'Un processable Entity') {
+    super(StatusCode.UN_PROCESSABLE, ResponseStatus.UN_PROCESSABLE, message);
   }
 }
 

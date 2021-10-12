@@ -17,3 +17,5 @@ export const isEmpty = (value: string | number | object): boolean => {
     return false;
   }
 };
+
+export const formatEndpoint = (endpoint: string) => endpoint.replace(/\s/g, '').replace(/\//g, '-');

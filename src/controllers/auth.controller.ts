@@ -29,10 +29,10 @@ export class AuthController {
 
     return new SuccessResponse('login', {
       user:{
-        _id:findUser._id,
+        id:findUser._id,
         email:findUser.email
       },
-      tokens: token
+      token: token
     }).send(res);
   }
 

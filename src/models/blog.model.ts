@@ -129,11 +129,11 @@ const schema = new Schema(
     createdAt: {
       type: Date,
       required: true,
-      select: false,
+      select: true,
     },
     updatedAt: {
       type: Date,
-      select: false,
+      select: true,
     },
   },
   {

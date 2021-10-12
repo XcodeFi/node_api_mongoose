@@ -8,6 +8,11 @@ export default interface User extends Document{
   _id: string;
   email: string;
   password: string;
+  profilePicUrl?: string;
+  verified?: boolean;
+  status?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 const userSchema: Schema = new Schema({
@@ -19,6 +24,27 @@ const userSchema: Schema = new Schema({
   password: {
     type: String,
     required: true,
+  },
+  profilePicUrl: {
+    type: Schema.Types.String,
+    trim: true,
+  },
+  verified: {
+    type: Schema.Types.Boolean,
+    default: false,
+  },
+  status: {
+    type: Schema.Types.Boolean,
+    default: true,
+  },
+  createdAt: {
+    type: Date,
+    required: true,
+    select: false,
+  },
+  updatedAt: {
+    type: Date,
+    select: false,
   },
 });
 
