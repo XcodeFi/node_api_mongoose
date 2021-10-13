@@ -27,10 +27,10 @@ class AuthService {
     if (isEmpty(userData)) throw new BadRequestResponse("You're not userData");
 
     const findUser: User = await this.users.findOne({ email: userData.email });
-    if (!findUser) throw new UnprocessableResponse(`You're email ${userData.email} not found`);
+    if (!findUser) throw new UnprocessableResponse('',[`You're email ${userData.email} not found`]);
 
     const isPasswordMatching: boolean = await bcrypt.compare(userData.password, findUser.password);
-    if (!isPasswordMatching) throw new UnprocessableResponse("You're password not matching");
+    if (!isPasswordMatching) throw new UnprocessableResponse("matching",["You're password not matching"]);
 
     const tokenData = this.createToken(findUser);
     const cookie = this.createCookie(tokenData);

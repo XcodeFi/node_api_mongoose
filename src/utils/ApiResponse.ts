@@ -69,12 +69,15 @@ export class ForbiddenResponse extends ApiResponse {
   }
 }
 
-export class UnprocessableResponse extends ApiResponse {
-  constructor(message = 'Un processable Entity') {
+export class UnprocessableResponse<T> extends ApiResponse {
+  constructor(message: string, private data: T) {
     super(StatusCode.UN_PROCESSABLE, ResponseStatus.UN_PROCESSABLE, message);
   }
-}
 
+  send(res: Response): Response {
+    return super.prepare<UnprocessableResponse<T>>(res, this);
+  }
+}
 export class BadRequestResponse extends ApiResponse {
   constructor(message = 'Bad Parameters') {
     super(StatusCode.FAILURE, ResponseStatus.BAD_REQUEST, message);
