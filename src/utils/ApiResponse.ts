@@ -24,7 +24,7 @@ abstract class ApiResponse {
     protected statusCode: StatusCode,
     protected status: ResponseStatus,
     protected message: string
-  ) {}
+  ) { }
 
   protected prepare<T extends ApiResponse>(res: Response, response: T): Response {
     return res.status(this.status).json(ApiResponse.sanitize(response));
@@ -70,7 +70,7 @@ export class ForbiddenResponse extends ApiResponse {
 }
 
 export class UnprocessableResponse<T> extends ApiResponse {
-  constructor(message: string, private data: T) {
+  constructor(message: string, protected data: T) {
     super(StatusCode.UN_PROCESSABLE, ResponseStatus.UN_PROCESSABLE, message);
   }
 
@@ -78,6 +78,13 @@ export class UnprocessableResponse<T> extends ApiResponse {
     return super.prepare<UnprocessableResponse<T>>(res, this);
   }
 }
+
+export class ModelInvalidResponse<T> extends UnprocessableResponse<T> {
+  constructor(protected data: T, message: string = "Model Invalid") {
+    super(message, data);
+  }
+}
+
 export class BadRequestResponse extends ApiResponse {
   constructor(message = 'Bad Parameters') {
     super(StatusCode.FAILURE, ResponseStatus.BAD_REQUEST, message);

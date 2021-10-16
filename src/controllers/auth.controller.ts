@@ -7,6 +7,7 @@ import { validationMiddleware } from '@middlewares/validation.middleware';
 import AuthService from '@services/auth.service';
 import User from '@/models/users.model';
 import { SuccessResponse } from '@/utils/ApiResponse';
+import { modelValidationMiddleware } from '@/middlewares/modelValidation.middleware';
 
 @JsonController()
 export class AuthController {
@@ -21,7 +22,7 @@ export class AuthController {
   }
 
   @Post('/login')
-  @UseBefore(validationMiddleware(CreateUserDto, 'body'))
+  @UseBefore(modelValidationMiddleware(CreateUserDto, 'body'))
   async logIn(@Res() res: Response, @Body() userData: CreateUserDto) {
     const { cookie, findUser, token } = await this.authService.login(userData);
 

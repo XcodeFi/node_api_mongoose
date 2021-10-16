@@ -1,5 +1,3 @@
-import { BadRequestResponse, UnprocessableResponse } from './../utils/ApiResponse';
-import { BadRequestError } from '@/utils/ApiError';
 import { plainToClass } from 'class-transformer';
 import { validate, ValidationError } from 'class-validator';
 import { RequestHandler } from 'express';
@@ -22,12 +20,13 @@ export const validationMiddleware = (
   return (req, res, next) => {
     validate(plainToClass(type, req[value]), { skipMissingProperties, whitelist, forbidNonWhitelisted }).then((errors: ValidationError[]) => {
       if (errors.length > 0) {
-        const message = errors.map(getAllNestedErrors);
-        // const errors = errors.map(getAllNestedErrors);
-        return new UnprocessableResponse('errors', message ).send(res);
+        const message = errors.map(getAllNestedErrors).join(', ');
+        next(new HttpException(400, message));
       } else {
         next();
       }
     });
   };
 };
+
+
