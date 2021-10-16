@@ -3,25 +3,19 @@ import { validate, ValidationError } from 'class-validator';
 import { RequestHandler } from 'express';
 import { ModelInvalidResponse } from '@/utils/ApiResponse';
 
-const getAllNestedObjErrors = (error: ValidationError): Record<string,string[]> => {
+const getAllNestedObjErrors = (error: ValidationError): Record<string, string[]> => {
   if (error.constraints) {
 
     let _key = error.property;
     let errs = Object.values(error.constraints);
 
-    const rs: {
-      [key: string]: string[]
-    } = {};
-
-    rs[_key] = errs;
-
-    return rs;
+    return { [_key]: errs };
   }
-  return error.children.reduce((pre,curr)=>{
+  return error.children.reduce((pre, curr) => {
     let cur = getAllNestedObjErrors(curr);
 
-    return {...pre,...cur};
-  },{});
+    return { ...pre, ...cur };
+  }, {});
 }
 
 export const modelValidationMiddleware = (
@@ -34,11 +28,11 @@ export const modelValidationMiddleware = (
   return (req, res, next) => {
     validate(plainToClass(type, req[value]), { skipMissingProperties, whitelist, forbidNonWhitelisted }).then((errors: ValidationError[]) => {
       if (errors.length > 0) {
-        const messageObj = errors.reduce((pre,curr)=>{
-           let cur = getAllNestedObjErrors(curr);
+        const messageObj = errors.reduce((pre, curr) => {
+          let cur = getAllNestedObjErrors(curr);
 
-          return {...pre,...cur};
-        },{});
+          return { ...pre, ...cur };
+        }, {});
 
         return new ModelInvalidResponse(messageObj).send(res);
       } else {

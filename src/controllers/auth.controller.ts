@@ -14,7 +14,7 @@ export class AuthController {
   public authService = new AuthService();
 
   @Post('/signup')
-  @UseBefore(validationMiddleware(CreateUserDto, 'body'))
+  @UseBefore(modelValidationMiddleware(CreateUserDto, 'body'))
   @HttpCode(201)
   async signUp(@Body() userData: CreateUserDto, @Res() res) {
     const signUpUserData: User = await this.authService.signup(userData);
