@@ -31,9 +31,9 @@ export class AuthController {
     return new SuccessResponse('login', {
       user:{
         id:findUser._id,
-        email:findUser.email
-      },
-      token: token
+        email:findUser.email,
+        token: token
+      }
     }).send(res);
   }
 

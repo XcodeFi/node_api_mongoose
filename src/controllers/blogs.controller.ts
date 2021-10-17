@@ -1,3 +1,4 @@
+import { modelValidationMiddleware } from './../middlewares/modelValidation.middleware';
 import { NextFunction, Request, Response } from 'express';
 import { CreateBlogDto } from '@dtos/blog.dto';
 import blogService from '@services/blog.service';
@@ -32,8 +33,9 @@ export class BlogsController {
 
   @Post('/blogs')
   @UseBefore(authMiddleware)
+  @UseBefore(modelValidationMiddleware(CreateBlogDto, 'body', true))
   @OpenAPI({ summary: 'Create a new blog' })
-  async createBlog(@Body({ validate: true }) blogData: CreateBlogDto, @Req() req: RequestWithUser, @Res() res: any) {
+  async createBlog(@Body() blogData: CreateBlogDto, @Req() req: RequestWithUser, @Res() res: any) {
     const userData: User = req.user;
 
     const createBlogData: Blog = await this.blogService.createBlog(blogData, userData);
@@ -42,7 +44,7 @@ export class BlogsController {
   }
 
   @Put('/blogs/:id')
-  @UseBefore(validationMiddleware(CreateBlogDto, 'body', true))
+  @UseBefore(modelValidationMiddleware(CreateBlogDto, 'body', true))
   @OpenAPI({ summary: 'Update a blog' })
   async updateBlog(@Res() res: any, @Param('id') blogId: string, @Body() blogData: CreateBlogDto) {
     const updateBlogData: Blog = await this.blogService.updateBlog(blogId, blogData);
