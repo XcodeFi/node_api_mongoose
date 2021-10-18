@@ -10,13 +10,11 @@ afterAll(async () => {
 });
 
 describe('Testing Tags', () => {
-
   const app = new App([TagsController]);
   const tags = TagModel;
 
   describe('[GET] /tags', () => {
     it('response fineAll Tags', async () => {
-
       tags.find = jest.fn().mockReturnValue([
         {
           _id: 'qpwoeiruty',
@@ -53,16 +51,15 @@ describe('Testing Tags', () => {
   });
 
   describe('[POST] /tags', () => {
-
     it('response Create Tag', async () => {
       const tagData: CreateTagDto = {
-        name: 'test@email.com'
+        name: 'test@email.com',
       };
 
       tags.findOne = jest.fn().mockReturnValue(null);
       tags.create = jest.fn().mockReturnValue({
         _id: '60706478aad6c9ad19a31c84',
-        name: tagData.name
+        name: tagData.name,
       });
 
       (mongoose as any).connect = jest.fn();
@@ -72,7 +69,6 @@ describe('Testing Tags', () => {
 
   describe('[PUT] /tags/:id', () => {
     it('response Update Tag', async () => {
-
       const tagId = '60706478aad6c9ad19a31c84';
       const tagData: CreateTagDto = {
         name: 'test@email.com',
@@ -97,7 +93,6 @@ describe('Testing Tags', () => {
 
   describe('[DELETE] /tags/:id', () => {
     it('response Delete Tag', async () => {
-
       const tagId = '60706478aad6c9ad19a31c84';
 
       tags.findByIdAndDelete = jest.fn().mockReturnValue({

@@ -139,9 +139,6 @@ const schema = new Schema(
   {
     versionKey: false,
   },
-).index(
-  { title: 'text', description: 'text' },
-  { weights: { title: 3, description: 1 }, background: false },
-);
+).index({ title: 'text', description: 'text' }, { weights: { title: 3, description: 1 }, background: false });
 
 export const BlogModel = model<Blog>(DOCUMENT_NAME, schema, COLLECTION_NAME);

@@ -1,3 +1,4 @@
+import { ValidationSource } from './../enums/validation-source';
 import { modelValidationMiddleware } from './../middlewares/modelValidation.middleware';
 import { NextFunction, Request, Response } from 'express';
 import { CreateBlogDto } from '@dtos/blog.dto';
@@ -20,7 +21,25 @@ export class BlogsController {
   async getBlogs(@Req() req: any, @Res() res: Response) {
     const findAllBlogsData: Blog[] = await this.blogService.findAllBlog();
     return new SuccessResponse('findAll', findAllBlogsData).send(res);
-  };
+  }
+
+  @Get('/blogs/:slug')
+  @OpenAPI({ summary: 'Return find a blog' })
+  async getBlogByUrl(@Param('slug') slug: string, @Req() req: any, @Res() res: any) {
+    const blogUrl: string = slug;
+    const findOneBlogData: Blog = await this.blogService.findByUrl(blogUrl);
+
+    return new SuccessResponse('findByUrl', findOneBlogData).send(res);
+  }
+
+  @Get('/blogs/:slug/comments')
+  @OpenAPI({ summary: 'Return find a blog' })
+  async getBlogComments(@Param('slug') slug: string, @Req() req: any, @Res() res: any) {
+    const blogUrl: string = slug;
+    // const findOneBlogData: Blog = await this.blogService.findByUrl(blogUrl);
+
+    return new SuccessResponse('findByUrl', []).send(res);
+  }
 
   @Get('/blogs/:id')
   @OpenAPI({ summary: 'Return find a blog' })
@@ -33,7 +52,7 @@ export class BlogsController {
 
   @Post('/blogs')
   @UseBefore(authMiddleware)
-  @UseBefore(modelValidationMiddleware(CreateBlogDto, 'body', true))
+  @UseBefore(modelValidationMiddleware(CreateBlogDto, ValidationSource.BODY, true))
   @OpenAPI({ summary: 'Create a new blog' })
   async createBlog(@Body() blogData: CreateBlogDto, @Req() req: RequestWithUser, @Res() res: any) {
     const userData: User = req.user;
@@ -44,7 +63,7 @@ export class BlogsController {
   }
 
   @Put('/blogs/:id')
-  @UseBefore(modelValidationMiddleware(CreateBlogDto, 'body', true))
+  @UseBefore(modelValidationMiddleware(CreateBlogDto, ValidationSource.BODY, true))
   @OpenAPI({ summary: 'Update a blog' })
   async updateBlog(@Res() res: any, @Param('id') blogId: string, @Body() blogData: CreateBlogDto) {
     const updateBlogData: Blog = await this.blogService.updateBlog(blogId, blogData);

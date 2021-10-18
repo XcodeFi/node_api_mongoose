@@ -33,7 +33,7 @@ export class CreateBlogDto {
   @ArrayMaxSize(5)
   @MinLength(3, { each: true, message: 'Tag is too short. Minimal length is $value characters' })
   @MaxLength(50, { each: true, message: 'Tag is too long. Maximal length is $value characters' })
-  tags?: string[];// Joi.array().optional().min(1).items(Joi.string().uppercase()),
+  tags?: string[]; // Joi.array().optional().min(1).items(Joi.string().uppercase()),
 }
 
 export class CreateBlogDto1 {

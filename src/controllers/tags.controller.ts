@@ -15,7 +15,7 @@ export class TagsController {
   async getTags(@Req() req: any, @Res() res: Response) {
     const findAllTagsData: Tag[] = await this.tagService.findAllTag();
     return res.status(200).json({ data: findAllTagsData, message: 'findAll' });
-  };
+  }
 
   @Get('/tags/:id')
   @OpenAPI({ summary: 'Return find a tag' })

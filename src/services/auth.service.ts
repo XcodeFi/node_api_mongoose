@@ -23,19 +23,19 @@ class AuthService {
     return createUserData;
   }
 
-  public async login(userData: CreateUserDto): Promise<{ cookie: string; findUser: User, token: string }> {
+  public async login(userData: CreateUserDto): Promise<{ cookie: string; findUser: User; token: string }> {
     if (isEmpty(userData)) throw new BadRequestResponse("You're not userData");
 
     const findUser: User = await this.users.findOne({ email: userData.email });
-    if (!findUser) throw new UnprocessableResponse('',[`You're email ${userData.email} not found`]);
+    if (!findUser) throw new UnprocessableResponse('', [`You're email ${userData.email} not found`]);
 
     const isPasswordMatching: boolean = await bcrypt.compare(userData.password, findUser.password);
-    if (!isPasswordMatching) throw new UnprocessableResponse("matching",["You're password not matching"]);
+    if (!isPasswordMatching) throw new UnprocessableResponse('matching', ["You're password not matching"]);
 
     const tokenData = this.createToken(findUser);
     const cookie = this.createCookie(tokenData);
 
-    return { cookie, findUser, token: tokenData.token};
+    return { cookie, findUser, token: tokenData.token };
   }
 
   public async logout(userData: User): Promise<User> {

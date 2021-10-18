@@ -18,7 +18,7 @@ export class AuthController {
   @HttpCode(201)
   async signUp(@Body() userData: CreateUserDto, @Res() res) {
     const signUpUserData: User = await this.authService.signup(userData);
-    return res.status(200).json( { data: signUpUserData, message: 'signup'});
+    return res.status(200).json({ data: signUpUserData, message: 'signup' });
   }
 
   @Post('/login')
@@ -29,11 +29,11 @@ export class AuthController {
     res.setHeader('Set-Cookie', [cookie]);
 
     return new SuccessResponse('login', {
-      user:{
-        id:findUser._id,
-        email:findUser.email,
-        token: token
-      }
+      user: {
+        id: findUser._id,
+        email: findUser.email,
+        token: token,
+      },
     }).send(res);
   }
 
@@ -44,6 +44,6 @@ export class AuthController {
     const logOutUserData: User = await this.authService.logout(userData);
 
     res.setHeader('Set-Cookie', ['Authorization=; Max-age=0']);
-    return res.status(200).json( { data: logOutUserData, message: 'logout'});
+    return res.status(200).json({ data: logOutUserData, message: 'logout' });
   }
 }

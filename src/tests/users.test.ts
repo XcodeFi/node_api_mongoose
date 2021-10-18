@@ -11,13 +11,11 @@ afterAll(async () => {
 });
 
 describe('Testing Users', () => {
-
   const app = new App([UsersController]);
   const users = UserModel;
 
   describe('[GET] /users', () => {
     it('response fineAll Users', async () => {
-
       users.find = jest.fn().mockReturnValue([
         {
           _id: 'qpwoeiruty',
@@ -58,7 +56,6 @@ describe('Testing Users', () => {
   });
 
   describe('[POST] /users', () => {
-
     it('response Create User', async () => {
       const userData: CreateUserDto = {
         email: 'test@email.com',
@@ -79,7 +76,6 @@ describe('Testing Users', () => {
 
   describe('[PUT] /users/:id', () => {
     it('response Update User', async () => {
-
       const userId = '60706478aad6c9ad19a31c84';
       const userData: CreateUserDto = {
         email: 'test@email.com',

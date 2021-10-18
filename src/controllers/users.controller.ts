@@ -10,7 +10,7 @@ export class UsersController {
   public userService = new userService();
   // constructor(private userService: userService) {}
 
-   /**
+  /**
    * Retrieves the details of an existing user.
    * Supply the unique user ID from either and receive corresponding user details.
    */
