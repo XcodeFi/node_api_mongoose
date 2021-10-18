@@ -12,8 +12,8 @@ class BlogService {
   private BLOG_ALL_DATA = '+text +draftText +isSubmitted +isDraft +isPublished +status +createdBy +updatedBy';
 
   public async findAllBlog(): Promise<Blog[]> {
-    const blogs: Blog[] = await this.blogs.find();
-    return blogs;
+    const rs: Blog[] = await this.blogs.find().select('+text').populate('author', this.AUTHOR_DETAIL).lean<Blog[]>().exec();
+    return rs;
   }
 
   public async findBlogById(blogId: string): Promise<Blog> {
@@ -71,7 +71,7 @@ class BlogService {
   }
 
   public async deleteBlog(blogId: string): Promise<Blog> {
-    const deleteBlogById: Blog = await this.blogs.findByIdAndDelete(blogId);
+    const deleteBlogById: Blog = await this.blogs.findByIdAndDelete(blogId).lean();
     if (!deleteBlogById) throw new HttpException(409, "You're not blog");
 
     return deleteBlogById;

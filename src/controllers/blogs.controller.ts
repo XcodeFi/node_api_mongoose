@@ -23,7 +23,7 @@ export class BlogsController {
     const offset = query.offset;// parseInt(req.query.offset as string);
 
     const findAllBlogsData: Blog[] = await this.blogService.findAllBlog();
-    return new SuccessResponse('findAll', { articles: findAllBlogsData, articlesCount: 5 }).send(res);
+    return new SuccessResponse('findAll', { articles: findAllBlogsData, articlesCount: 25 }).send(res);
   }
 
   @Get('/blogs/:slug')
