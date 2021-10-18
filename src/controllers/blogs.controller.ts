@@ -3,14 +3,14 @@ import { modelValidationMiddleware } from './../middlewares/modelValidation.midd
 import { NextFunction, Request, Response } from 'express';
 import { CreateBlogDto } from '@dtos/blog.dto';
 import blogService from '@services/blog.service';
-import { Get, Req, Body, Post, UseBefore, HttpCode, Res, Put, Delete, Param, JsonController } from 'routing-controllers';
+import { Get, Req, Body, Post, UseBefore, HttpCode, Res, Put, Delete, Param, JsonController, QueryParams } from 'routing-controllers';
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
-import { validationMiddleware } from '@/middlewares/validation.middleware';
 import Blog from '@/models/blog.model';
 import authMiddleware from '@/middlewares/auth.middleware';
 import { RequestWithUser } from '@/interfaces/auth.interface';
 import User from '@/models/users.model';
 import { SuccessResponse } from '@/utils/ApiResponse';
+import { PaginationQuery } from '@/dtos/pagnation.dto';
 
 @JsonController()
 export class BlogsController {
@@ -18,9 +18,12 @@ export class BlogsController {
 
   @Get('/blogs')
   @OpenAPI({ summary: 'Return a list of blogs' })
-  async getBlogs(@Req() req: any, @Res() res: Response) {
+  async getBlogs(@Req() req: any, @Res() res: Response, @QueryParams() query: PaginationQuery) {
+    const limit = query.limit;
+    const offset = query.offset;// parseInt(req.query.offset as string);
+
     const findAllBlogsData: Blog[] = await this.blogService.findAllBlog();
-    return new SuccessResponse('findAll', findAllBlogsData).send(res);
+    return new SuccessResponse('findAll', { articles: findAllBlogsData, articlesCount: 5 }).send(res);
   }
 
   @Get('/blogs/:slug')
