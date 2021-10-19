@@ -11,6 +11,7 @@ import { RequestWithUser } from '@/interfaces/auth.interface';
 import User from '@/models/users.model';
 import { SuccessResponse } from '@/utils/ApiResponse';
 import { PaginationQuery } from '@/dtos/pagnation.dto';
+import { BadRequestError } from '@/utils/ApiError';
 
 @JsonController()
 export class BlogsController {
@@ -30,9 +31,11 @@ export class BlogsController {
   @OpenAPI({ summary: 'Return find a blog' })
   async getBlogByUrl(@Param('slug') slug: string, @Req() req: any, @Res() res: any) {
     const blogUrl: string = slug;
-    const findOneBlogData: Blog = await this.blogService.findByUrl(blogUrl);
+    const blog: Blog = await this.blogService.findByUrl(blogUrl);
 
-    return new SuccessResponse('findByUrl', findOneBlogData).send(res);
+    if (!blog) throw new BadRequestError('Blog do not exists');
+
+    return new SuccessResponse('findByUrl', blog).send(res);
   }
 
   @Get('/blogs/:slug/comments')
@@ -72,6 +75,25 @@ export class BlogsController {
     const updateBlogData: Blog = await this.blogService.updateBlog(blogId, blogData);
     return res.status(200).json({ data: updateBlogData, message: 'updated' });
   }
+
+  @Put('/blogs/:id')
+  @UseBefore(modelValidationMiddleware(CreateBlogDto, ValidationSource.BODY, true))
+  @OpenAPI({ summary: 'publish all blog' })
+  async updateBlog(req: ProtectedRequest, res) => {
+      const blog = await BlogRepo.findBlogAllDataById(new Types.ObjectId(req.params.id));
+      if (!blog) throw new BadRequestError('Blog does not exists');
+  
+      blog.isDraft = false;
+      blog.isSubmitted = false;
+      blog.isPublished = true;
+      blog.text = blog.draftText;
+      if (!blog.publishedAt) blog.publishedAt = new Date();
+  
+      await BlogRepo.update(blog);
+      return new SuccessMsgResponse('Blog published successfully').send(res);
+    }),
+  );
+
 
   @Delete('/blogs/:id')
   @OpenAPI({ summary: 'Delete a blog' })

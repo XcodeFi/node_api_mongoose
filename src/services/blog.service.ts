@@ -38,6 +38,7 @@ class BlogService {
     const blog = {
       title: blogData.title,
       description: blogData.description,
+      text: blogData.text,
       draftText: blogData.text,
       tags: blogData.tags,
       author: createdBy,
