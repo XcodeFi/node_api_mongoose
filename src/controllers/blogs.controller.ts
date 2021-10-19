@@ -9,7 +9,7 @@ import Blog from '@/models/blog.model';
 import authMiddleware from '@/middlewares/auth.middleware';
 import { RequestWithUser } from '@/interfaces/auth.interface';
 import User from '@/models/users.model';
-import { SuccessResponse } from '@/utils/ApiResponse';
+import { SuccessMsgResponse, SuccessResponse } from '@/utils/ApiResponse';
 import { PaginationQuery } from '@/dtos/pagnation.dto';
 import { BadRequestError } from '@/utils/ApiError';
 
@@ -76,24 +76,22 @@ export class BlogsController {
     return res.status(200).json({ data: updateBlogData, message: 'updated' });
   }
 
-  @Put('/blogs/:id')
+  @Put('/blogs/publish-all')
   @UseBefore(modelValidationMiddleware(CreateBlogDto, ValidationSource.BODY, true))
   @OpenAPI({ summary: 'publish all blog' })
-  async updateBlog(req: ProtectedRequest, res) => {
-      const blog = await BlogRepo.findBlogAllDataById(new Types.ObjectId(req.params.id));
-      if (!blog) throw new BadRequestError('Blog does not exists');
-  
-      blog.isDraft = false;
-      blog.isSubmitted = false;
-      blog.isPublished = true;
-      blog.text = blog.draftText;
-      if (!blog.publishedAt) blog.publishedAt = new Date();
-  
-      await BlogRepo.update(blog);
-      return new SuccessMsgResponse('Blog published successfully').send(res);
-    }),
-  );
+  async publishAll(@Res() res: any, @Req() req) {
+    const blog = await this.blogService.findBlogById(req.params.id);
+    if (!blog) throw new BadRequestError('Blog does not exists');
 
+    blog.isDraft = false;
+    blog.isSubmitted = false;
+    blog.isPublished = true;
+    blog.text = blog.draftText;
+    if (!blog.publishedAt) blog.publishedAt = new Date();
+
+    // await this.blogService.updateBlog(blog.id,blog);
+    return new SuccessMsgResponse('Blog published successfully').send(res);
+  }
 
   @Delete('/blogs/:id')
   @OpenAPI({ summary: 'Delete a blog' })
