@@ -11,9 +11,37 @@ class BlogService {
   private BLOG_INFO_ADDITIONAL = '+isSubmitted +isDraft +isPublished +createdBy +updatedBy';
   private BLOG_ALL_DATA = '+text +draftText +isSubmitted +isDraft +isPublished +status +createdBy +updatedBy';
 
-  public async findAllBlog(): Promise<Blog[]> {
-    const rs: Blog[] = await this.blogs.find().select('+text').populate('author', this.AUTHOR_DETAIL).lean<Blog[]>().exec();
-    return rs;
+  public async findAllBlog(offset: number, limit: number): Promise<{
+    articles: Blog[],
+    articlesCount: number
+  }> {
+
+    const queryRs: Blog[] = await this.blogs
+      .find()
+      .select('+text')
+      .skip(offset)
+      .limit(limit)
+      .populate('author', this.AUTHOR_DETAIL)
+      .sort({ publishedAt: -1 })
+      .lean<Blog[]>()
+      .exec();
+
+    const countRs = await this.blogs.count();
+
+    return {
+      articles: queryRs,
+      articlesCount: countRs
+    };
+  }
+
+  public async findLatestBlogs(offset: number, limit: number): Promise<Blog[]> {
+    return await BlogModel.find({ status: true, isPublished: true })
+      .skip(offset)
+      .limit(limit)
+      .populate('author', this.AUTHOR_DETAIL)
+      .sort({ publishedAt: -1 })
+      .lean<Blog[]>()
+      .exec();
   }
 
   public async findBlogById(blogId: string): Promise<Blog> {
