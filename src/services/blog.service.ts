@@ -11,11 +11,13 @@ class BlogService {
   private BLOG_INFO_ADDITIONAL = '+isSubmitted +isDraft +isPublished +createdBy +updatedBy';
   private BLOG_ALL_DATA = '+text +draftText +isSubmitted +isDraft +isPublished +status +createdBy +updatedBy';
 
-  public async findAllBlog(offset: number, limit: number): Promise<{
-    articles: Blog[],
-    articlesCount: number
+  public async findAllBlog(
+    offset: number,
+    limit: number,
+  ): Promise<{
+    articles: Blog[];
+    articlesCount: number;
   }> {
-
     const queryRs: Blog[] = await this.blogs
       .find()
       .select('+text')
@@ -30,7 +32,7 @@ class BlogService {
 
     return {
       articles: queryRs,
-      articlesCount: countRs
+      articlesCount: countRs,
     };
   }
 
@@ -53,12 +55,9 @@ class BlogService {
     return findBlog;
   }
 
-  public async findByTagAndPaginated(
-    tag: string,
-    pageNumber: number,
-    limit: number,
-  ): Promise<Blog[]> {
-    return await this.blogs.find({ tags: tag, status: true, isPublished: true })
+  public async findByTagAndPaginated(tag: string, pageNumber: number, limit: number): Promise<Blog[]> {
+    return await this.blogs
+      .find({ tags: tag, status: true, isPublished: true })
       .skip(limit * (pageNumber - 1))
       .limit(limit)
       .populate('author', this.AUTHOR_DETAIL)

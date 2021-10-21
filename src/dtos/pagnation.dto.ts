@@ -1,12 +1,12 @@
-import { IsNumber, IsOptional, IsPositive, IsString} from 'class-validator';
+import { IsNumber, IsOptional, IsPositive, IsString } from 'class-validator';
 
-export class PaginationQuery  {
+export class PaginationQuery {
   @IsNumber()
   @IsOptional()
   @IsPositive()
-  public limit?: number
+  public limit?: number;
 
   @IsNumber()
   @IsOptional()
-  public offset?: number
+  public offset?: number;
 }

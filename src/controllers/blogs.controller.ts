@@ -1,10 +1,8 @@
 import { ValidationSource } from './../enums/validation-source';
 import { modelValidationMiddleware } from './../middlewares/modelValidation.middleware';
-import { NextFunction, Request, Response } from 'express';
 import { CreateBlogDto } from '@dtos/blog.dto';
-import blogService from '@services/blog.service';
-import { Get, Req, Body, Post, UseBefore, HttpCode, Res, Put, Delete, Param, JsonController, QueryParams } from 'routing-controllers';
-import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
+import { Get, Req, Body, Post, UseBefore, Res, Put, Delete, Param, JsonController, QueryParams } from 'routing-controllers';
+import { OpenAPI } from 'routing-controllers-openapi';
 import Blog from '@/models/blog.model';
 import authMiddleware from '@/middlewares/auth.middleware';
 import { RequestWithUser } from '@/interfaces/auth.interface';
@@ -12,6 +10,7 @@ import User from '@/models/users.model';
 import { SuccessMsgResponse, SuccessResponse } from '@/utils/ApiResponse';
 import { PaginationQuery } from '@/dtos/pagnation.dto';
 import { BadRequestError } from '@/utils/ApiError';
+import blogService from '@/services/blog.service';
 
 @JsonController()
 export class BlogsController {

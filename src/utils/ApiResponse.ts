@@ -20,11 +20,7 @@ enum ResponseStatus {
 }
 
 abstract class ApiResponse {
-  constructor(
-    protected statusCode: StatusCode,
-    protected status: ResponseStatus,
-    protected message: string
-  ) { }
+  constructor(protected statusCode: StatusCode, protected status: ResponseStatus, protected message: string) {}
 
   protected prepare<T extends ApiResponse>(res: Response, response: T): Response {
     return res.status(this.status).json(ApiResponse.sanitize(response));
@@ -80,7 +76,7 @@ export class UnprocessableResponse<T> extends ApiResponse {
 }
 
 export class ModelInvalidResponse<T> extends UnprocessableResponse<T> {
-  constructor(protected data: T, message: string = "Model Invalid") {
+  constructor(protected data: T, message = 'Model Invalid') {
     super(message, data);
   }
 }
