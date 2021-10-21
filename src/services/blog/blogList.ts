@@ -1,6 +1,5 @@
 import Blog, { BlogModel } from '@/models/blog.model';
 import User from '@/models/users.model';
-import { BadRequestError } from '@/utils/ApiError';
 import { CreateBlogDto } from '@dtos/blog.dto';
 import { HttpException } from '@exceptions/HttpException';
 import { isEmpty } from '@utils/util';
