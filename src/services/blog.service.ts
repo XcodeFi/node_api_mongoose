@@ -25,6 +25,55 @@ class BlogService {
     return findBlog;
   }
 
+  public async findByTagAndPaginated(
+    tag: string,
+    pageNumber: number,
+    limit: number,
+  ): Promise<Blog[]> {
+    return await this.blogs.find({ tags: tag, status: true, isPublished: true })
+      .skip(limit * (pageNumber - 1))
+      .limit(limit)
+      .populate('author', this.AUTHOR_DETAIL)
+      .sort({ updatedAt: -1 })
+      .lean<Blog[]>()
+      .exec();
+  }
+
+  public async findAllDrafts(): Promise<Blog[]> {
+    return await this.findDetailedBlogs({ isDraft: true, status: true });
+  }
+
+  public async findAllSubmissions(): Promise<Blog[]> {
+    return await this.findDetailedBlogs({ isSubmitted: true, status: true });
+  }
+
+  public async findAllPublished(): Promise<Blog[]> {
+    return await this.findDetailedBlogs({ isPublished: true, status: true });
+  }
+
+  public async findAllSubmissionsForWriter(user: User): Promise<Blog[]> {
+    return await this.findDetailedBlogs({ author: user, status: true, isSubmitted: true });
+  }
+
+  public async findAllPublishedForWriter(user: User): Promise<Blog[]> {
+    return await this.findDetailedBlogs({ author: user, status: true, isPublished: true });
+  }
+
+  public async findAllDraftsForWriter(user: User): Promise<Blog[]> {
+    return await this.findDetailedBlogs({ author: user, status: true, isDraft: true });
+  }
+
+  private async findDetailedBlogs(query: Record<string, unknown>): Promise<Blog[]> {
+    return await BlogModel.find(query)
+      .select(this.BLOG_INFO_ADDITIONAL)
+      .populate('author', this.AUTHOR_DETAIL)
+      .populate('createdBy', this.AUTHOR_DETAIL)
+      .populate('updatedBy', this.AUTHOR_DETAIL)
+      .sort({ updatedAt: -1 })
+      .lean<Blog[]>()
+      .exec();
+  }
+
   public async findByUrl(blogUrl: string): Promise<Blog | null> {
     return BlogModel.findOne({ blogUrl: blogUrl, status: true }).select('+text').populate('author', this.AUTHOR_DETAIL).lean<Blog>().exec();
   }

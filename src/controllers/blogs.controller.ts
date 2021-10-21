@@ -77,7 +77,7 @@ export class BlogsController {
   }
 
   @Put('/blogs/publish-all')
-  @UseBefore(modelValidationMiddleware(CreateBlogDto, ValidationSource.BODY, true))
+  @UseBefore(authMiddleware)
   @OpenAPI({ summary: 'publish all blog' })
   async publishAll(@Res() res: any, @Req() req) {
     const blog = await this.blogService.findBlogById(req.params.id);
