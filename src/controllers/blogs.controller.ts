@@ -21,10 +21,10 @@ export class BlogsController {
   @OpenAPI({ summary: 'Return a list of blogs' })
   async getBlogs(@Req() req: any, @Res() res: Response, @QueryParams() query: PaginationQuery) {
     const limit = query.limit;
-    const offset = query.offset;// parseInt(req.query.offset as string);
+    const offset = query.offset;
 
-    const findAllBlogsData: Blog[] = await this.blogService.findAllBlog();
-    return new SuccessResponse('findAll', { articles: findAllBlogsData, articlesCount: 25 }).send(res);
+    const rs = await this.blogService.findAllBlog(offset, limit);
+    return new SuccessResponse('findAll', rs).send(res);
   }
 
   @Get('/blogs/:slug')
