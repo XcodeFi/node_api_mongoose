@@ -1,18 +1,11 @@
 import Blog, { BlogModel } from '@/models/blog.model';
 import User from '@/models/users.model';
-import { CreateBlogDto } from '@dtos/blog.dto';
 import { HttpException } from '@exceptions/HttpException';
 import { isEmpty } from '@utils/util';
 import { BlogServiceVariable } from './index';
 
 export default class BlogList {
-  static async findAllBlog(
-    offset: number,
-    limit: number,
-  ): Promise<{
-    articles: Blog[];
-    articlesCount: number;
-  }> {
+  static async findAllBlog(offset: number, limit: number): Promise<Record<string, unknown>> {
     const queryRs: Blog[] = await BlogModel.find()
       .select('+text')
       .skip(offset)
@@ -85,7 +78,7 @@ export default class BlogList {
 
   static async findDetailedBlogs(query: Record<string, unknown>): Promise<Blog[]> {
     return await BlogModel.find(query)
-      .select(BlogServiceVariable.BLOG_INFO_ADDITIONAL)
+      .select(BlogServiceVariable.BLOG_ALL_DATA)
       .populate('author', BlogServiceVariable.AUTHOR_DETAIL)
       .populate('createdBy', BlogServiceVariable.AUTHOR_DETAIL)
       .populate('updatedBy', BlogServiceVariable.AUTHOR_DETAIL)
@@ -96,7 +89,7 @@ export default class BlogList {
 
   static async findByUrl(blogUrl: string): Promise<Blog | null> {
     return BlogModel.findOne({ blogUrl: blogUrl, status: true })
-      .select('+text')
+      .select('+text +draftText')
       .populate('author', BlogServiceVariable.AUTHOR_DETAIL)
       .lean<Blog>()
       .exec();

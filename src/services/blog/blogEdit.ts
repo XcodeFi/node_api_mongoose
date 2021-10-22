@@ -4,6 +4,7 @@ import { BadRequestError } from '@/utils/ApiError';
 import { CreateBlogDto } from '@dtos/blog.dto';
 import { HttpException } from '@exceptions/HttpException';
 import { isEmpty } from '@utils/util';
+import { Promise } from 'mongoose';
 import blogList from './blogList';
 import { BlogServiceVariable } from './index';
 
@@ -47,6 +48,22 @@ export default class BlogEdit {
     if (!updateBlogById) throw new HttpException(409, "You're not blog");
 
     return updateBlogById;
+  }
+
+  static async publishAllBlog(): Promise<Blog[]> {
+    const blogDrags = await blogList.findAllDrafts();
+
+    Promise.all(
+      blogDrags.map((t: Blog) => {
+        return BlogModel.findByIdAndUpdate(t._id, { text: t.draftText, isPublished: true });
+      }),
+    );
+
+    return blogDrags;
+  }
+
+  async update(query: Record<string, unknown>, doc: Record<string, unknown>, options: Record<string, unknown>, cb: any): Promise<void> {
+    await BlogModel.where(query).setOptions(options).update(doc, cb);
   }
 
   static async deleteBlog(blogId: string): Promise<Blog> {
