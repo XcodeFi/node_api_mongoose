@@ -50,12 +50,20 @@ export default class BlogEdit {
     return updateBlogById;
   }
 
-  static async publishAllBlog(): Promise<Blog[]> {
+  static async publishAllBlog(user: User): Promise<Blog[]> {
     const blogDrags = await blogList.findAllDrafts();
+
+    const now = new Date();
 
     Promise.all(
       blogDrags.map((t: Blog) => {
-        return BlogModel.findByIdAndUpdate(t._id, { text: t.draftText, isPublished: true });
+        return BlogModel.findByIdAndUpdate(t._id, {
+          text: t.draftText,
+          isPublished: true,
+          isDraft: false,
+          updatedAt: now,
+          updatedBy: user.id,
+        });
       }),
     );
 

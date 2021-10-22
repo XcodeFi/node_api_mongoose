@@ -70,7 +70,7 @@ export class BlogsController {
   @UseBefore(authMiddleware)
   @OpenAPI({ summary: 'publish all blog' })
   async publishAll(@Res() res: any, @Req() req: any) {
-    await BlogEdit.publishAllBlog();
+    await BlogEdit.publishAllBlog(req.user);
     return new SuccessMsgResponse('Blog published successfully').send(res);
   }
 
