@@ -1,4 +1,5 @@
 import { Schema, model, Document } from 'mongoose';
+import Tag from './tags.model';
 import User from './users.model';
 
 export const DOCUMENT_NAME = 'Blog';
@@ -9,7 +10,7 @@ export default interface Blog extends Document {
   description: string;
   text?: string;
   draftText?: string;
-  tags: string[];
+  tags: Tag[] | string[];
   author: User | string;
   imgUrl?: string;
   blogUrl: string;
@@ -52,9 +53,9 @@ const schema = new Schema(
     },
     tags: [
       {
-        type: Schema.Types.String,
-        trim: true,
-        uppercase: true,
+        type: Schema.Types.ObjectId,
+        ref: 'Tag',
+        index: true,
       },
     ],
     author: {
