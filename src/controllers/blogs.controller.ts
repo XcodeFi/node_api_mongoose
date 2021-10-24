@@ -8,7 +8,7 @@ import authMiddleware from '@/middlewares/auth.middleware';
 import { RequestWithUser } from '@/interfaces/auth.interface';
 import User from '@/models/users.model';
 import { SuccessMsgResponse, SuccessResponse } from '@/utils/ApiResponse';
-import { PaginationQuery } from '@/dtos/pagnation.dto';
+import { PaginationQuery } from '@/dtos/pagination.dto';
 import { BadRequestError } from '@/utils/ApiError';
 import BlogList from '@/services/blog/blogList';
 import BlogEdit from '@/services/blog/blogEdit';
@@ -74,18 +74,21 @@ export class BlogsController {
     return new SuccessMsgResponse('Blog published successfully').send(res);
   }
 
-  @Put('/blogs/:id')
+  @Put('/blogs/:slug')
+  @UseBefore(authMiddleware)
   @UseBefore(modelValidationMiddleware(CreateBlogDto, ValidationSource.BODY, true))
   @OpenAPI({ summary: 'Update a blog' })
-  async updateBlog(@Res() res: any, @Param('id') blogId: string, @Body() blogData: CreateBlogDto) {
-    const updateBlogData: Blog = await BlogEdit.updateBlog(blogId, blogData);
-    return res.status(200).json({ data: updateBlogData, message: 'updated' });
+  async updateBlog(@Res() res: any, @Param('slug') blogUrl: string, @Body() blogData: CreateBlogDto, @Req() req: any) {
+
+    const updateBlogData: Blog = await BlogEdit.updateBlog(blogUrl, blogData, req);
+    return new SuccessResponse('Blog updated successfully', updateBlogData).send(res);
   }
 
-  @Delete('/blogs/:id')
+  @Delete('/blogs/:slug')
+  @UseBefore(authMiddleware)
   @OpenAPI({ summary: 'Delete a blog' })
-  async deleteBlog(@Param('id') blogId: string, @Res() res: any) {
-    const deleteBlogData: Blog = await BlogEdit.deleteBlog(blogId);
-    return res.status(200).json({ data: deleteBlogData, message: 'deleted' });
+  async deleteBlog(@Param('slug') blogUrl: string, @Res() res: any, @Req() req: any) {
+    const deleteBlogData: Blog = await BlogEdit.deleteBlog(blogUrl, req);
+    return new SuccessResponse('deleted', deleteBlogData).send(res);
   }
 }

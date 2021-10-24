@@ -6,7 +6,8 @@ import { BlogServiceVariable } from './index';
 
 export default class BlogList {
   static async findAllBlog(offset: number, limit: number): Promise<Record<string, unknown>> {
-    const queryRs: Blog[] = await BlogModel.find()
+    const queryRs: Blog[] = await BlogModel
+      .find({ status: true, isPublished: true })
       .select('+text')
       .skip(offset)
       .limit(limit)
@@ -15,7 +16,7 @@ export default class BlogList {
       .lean<Blog[]>()
       .exec();
 
-    const countRs = await BlogModel.count();
+    const countRs = await BlogModel.find({ status: true, isPublished: true }).count();
 
     return {
       articles: queryRs,
