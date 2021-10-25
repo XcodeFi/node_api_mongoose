@@ -1,3 +1,4 @@
+import Tag, { TagModel } from './../../models/tags.model';
 import Blog, { BlogModel } from '@/models/blog.model';
 import User from '@/models/users.model';
 import { BadRequestError, ForbiddenError } from '@/utils/ApiError';
@@ -20,7 +21,6 @@ export default class BlogEdit {
       description: blogData.description,
       text: blogData.text,
       draftText: blogData.text,
-      tags: blogData.tags,
       author: createdBy,
       blogUrl: blogData.blogUrl,
       imgUrl: blogData.imgUrl,
@@ -31,6 +31,24 @@ export default class BlogEdit {
 
     const createBlogData: Blog = await BlogModel.create(blog);
 
+    Promise.all(
+      blogData.tags.map(async (name: string) => {
+        const tagAdd = await TagModel.findOneAndUpdate({ name: name }, { name: name }, { upsert: true }).lean();
+
+        tagAdd.blogs = [...tagAdd.blogs, createBlogData._id];
+
+        await TagModel.findByIdAndUpdate(tagAdd._id, tagAdd);
+
+        // await BlogModel.findByIdAndUpdate(createBlogData._id, { $push: { tags: tagAdd._id } }, { new: true, useFindAndModify: false });
+
+        // await TagModel.findByIdAndUpdate(
+        //   tagAdd._id,
+        //   { $push: { blogs: createBlogData._id } },
+        //   { new: true, useFindAndModify: false }
+        // );
+      }),
+    );
+
     return createBlogData;
   }
 
@@ -40,10 +58,9 @@ export default class BlogEdit {
     const findBlog: Blog = await blogList.findUrlIfExists(blogData.blogUrl);
     if (!findBlog) throw new BadRequestError('Blog with this url not exists');
 
-    if (!findBlog.author._id.equals(req.user._id))
-      throw new ForbiddenError("You don't have necessary permissions");
+    if (!(findBlog.author as User)._id === req.user._id) throw new ForbiddenError("You don't have necessary permissions");
 
-    const updateBlogById: Blog = await BlogModel.findByIdAndUpdate(findBlog._id, { ...findBlog, ...blogData });
+    const updateBlogById: Blog = await BlogModel.findByIdAndUpdate(findBlog._id, blogData).lean();
 
     if (!updateBlogById) throw new HttpException(409, "You're not blog");
 
@@ -75,12 +92,10 @@ export default class BlogEdit {
   }
 
   static async deleteBlog(blogUrl: string, req: any): Promise<Blog> {
-
     const findBlog: Blog = await blogList.findUrlIfExists(blogUrl);
     if (!findBlog) throw new BadRequestError('Blog with this url not exists');
 
-    if (!findBlog.author._id.equals(req.user._id))
-      throw new ForbiddenError("You don't have necessary permissions");
+    if (!(findBlog.author as User)._id === req.user._id) throw new ForbiddenError("You don't have necessary permissions");
 
     const deleteBlogById: Blog = await BlogModel.findByIdAndUpdate(findBlog._id, { status: false });
 

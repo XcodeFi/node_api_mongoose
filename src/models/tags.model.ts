@@ -1,7 +1,9 @@
 import { model, Schema, Document } from 'mongoose';
+import Blog from './blog.model';
 export default interface Tag {
   _id: string;
   name: string;
+  blogs?: Blog[] | string[];
 }
 
 const tagSchema: Schema = new Schema({
@@ -10,6 +12,14 @@ const tagSchema: Schema = new Schema({
     required: true,
     unique: true,
   },
+  blogs: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'Blog',
+      required: false,
+      index: true,
+    },
+  ],
 });
 
 export const TagModel = model<Tag & Document>('Tag', tagSchema);

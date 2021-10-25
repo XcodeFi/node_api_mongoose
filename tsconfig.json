@@ -12,8 +12,11 @@
     "module": "commonjs",
     "pretty": true,
     "sourceMap": true,
+    // Generate d.ts files
     "declaration": true,
     "outDir": "./dist",
+     // Tells TypeScript to read JS files, as
+    // normally they are ignored as source files
     "allowJs": true,
     "noEmit": false,
     "esModuleInterop": true,
