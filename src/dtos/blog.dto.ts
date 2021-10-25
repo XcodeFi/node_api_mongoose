@@ -1,3 +1,4 @@
+import Tag from '@/models/tags.model';
 import { ArrayMaxSize, ArrayMinSize, IsInt, IsNumber, IsString, Max, MaxLength, Min, MinLength } from 'class-validator';
 
 export class CreateBlogDto {
@@ -33,7 +34,7 @@ export class CreateBlogDto {
   @ArrayMaxSize(5)
   @MinLength(3, { each: true, message: 'Tag is too short. Minimal length is $value characters' })
   @MaxLength(50, { each: true, message: 'Tag is too long. Maximal length is $value characters' })
-  tags?: string[]; // Joi.array().optional().min(1).items(Joi.string().uppercase()),
+  tags?: Tag[];
 }
 
 export class CreateBlogDto1 {

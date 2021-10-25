@@ -27,25 +27,18 @@ export default class BlogEdit {
       score: blogData.score,
       createdBy: createdBy,
       createdAt: new Date(),
+      isPublished: true
     } as Blog;
 
     const createBlogData: Blog = await BlogModel.create(blog);
 
     Promise.all(
-      blogData.tags.map(async (name: string) => {
-        const tagAdd = await TagModel.findOneAndUpdate({ name: name }, { name: name }, { upsert: true }).lean();
+      blogData.tags.map(async (t: Tag) => {
+        const tagAdd = await TagModel.findOneAndUpdate({ name: t.name }, { name: t.name }, { upsert: true }).lean();
 
-        tagAdd.blogs = [...tagAdd.blogs, createBlogData._id];
+        await BlogModel.findByIdAndUpdate(createBlogData._id, { $push: { tags: tagAdd._id } }, { new: true });
 
-        await TagModel.findByIdAndUpdate(tagAdd._id, tagAdd);
-
-        // await BlogModel.findByIdAndUpdate(createBlogData._id, { $push: { tags: tagAdd._id } }, { new: true, useFindAndModify: false });
-
-        // await TagModel.findByIdAndUpdate(
-        //   tagAdd._id,
-        //   { $push: { blogs: createBlogData._id } },
-        //   { new: true, useFindAndModify: false }
-        // );
+        await TagModel.findByIdAndUpdate(tagAdd._id, { $push: { blogs: createBlogData._id } }, { new: true });
       }),
     );
 
@@ -83,6 +76,16 @@ export default class BlogEdit {
         });
       }),
     );
+
+    return blogDrags;
+  }
+
+  static async deleteAllBlog(user: User): Promise<Blog[]> {
+    const blogDrags = await BlogModel.find({}).lean<Blog[]>().exec();
+
+    const now = new Date();
+
+    await BlogModel.deleteMany({}).exec();
 
     return blogDrags;
   }

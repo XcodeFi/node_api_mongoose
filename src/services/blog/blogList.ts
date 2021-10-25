@@ -12,6 +12,7 @@ export default class BlogList {
       .skip(offset)
       .limit(limit)
       .populate('author', BlogServiceVariable.AUTHOR_DETAIL)
+      .populate('tags', BlogServiceVariable.TAG)
       .sort({ publishedAt: -1 })
       .lean<Blog[]>()
       .exec();
@@ -92,6 +93,7 @@ export default class BlogList {
     return BlogModel.findOne({ blogUrl: blogUrl, status: true })
       .select('+text +draftText')
       .populate('author', BlogServiceVariable.AUTHOR_DETAIL)
+      .populate('tags', BlogServiceVariable.TAG)
       .lean<Blog>()
       .exec();
   }

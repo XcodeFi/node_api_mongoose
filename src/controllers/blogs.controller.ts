@@ -91,4 +91,12 @@ export class BlogsController {
     const deleteBlogData: Blog = await BlogEdit.deleteBlog(blogUrl, req);
     return new SuccessResponse('deleted', deleteBlogData).send(res);
   }
+
+  @Delete('/blogs')
+  @UseBefore(authMiddleware)
+  @OpenAPI({ summary: 'Delete all blog' })
+  async deleteAllBlog(@Res() res: any, @Req() req: any) {
+    const deleteBlogData: Blog[] = await BlogEdit.deleteAllBlog(req.user);
+    return new SuccessResponse('deleted', deleteBlogData).send(res);
+  }
 }
