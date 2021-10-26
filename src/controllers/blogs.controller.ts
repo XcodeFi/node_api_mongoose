@@ -1,6 +1,6 @@
 import { ValidationSource } from './../enums/validation-source';
 import { modelValidationMiddleware } from './../middlewares/modelValidation.middleware';
-import { CreateBlogDto } from '@dtos/blog.dto';
+import { BlogPagination, CreateBlogDto } from '@dtos/blog.dto';
 import { Get, Req, Body, Post, UseBefore, Res, Put, Delete, Param, JsonController, QueryParams } from 'routing-controllers';
 import { OpenAPI } from 'routing-controllers-openapi';
 import Blog from '@/models/blog.model';
@@ -8,7 +8,6 @@ import authMiddleware from '@/middlewares/auth.middleware';
 import { RequestWithUser } from '@/interfaces/auth.interface';
 import User from '@/models/users.model';
 import { SuccessMsgResponse, SuccessResponse } from '@/utils/ApiResponse';
-import { PaginationQuery } from '@/dtos/pagination.dto';
 import { BadRequestError } from '@/utils/ApiError';
 import BlogList from '@/services/blog/blogList';
 import BlogEdit from '@/services/blog/blogEdit';
@@ -17,9 +16,10 @@ import BlogEdit from '@/services/blog/blogEdit';
 export class BlogsController {
   @Get('/blogs')
   @OpenAPI({ summary: 'Return a list of blogs' })
-  async getBlogs(@Req() req: any, @Res() res: any, @QueryParams() query: PaginationQuery) {
+  async getBlogs(@Req() req: any, @Res() res: any, @QueryParams() query: BlogPagination) {
     const limit = query.limit;
     const offset = query.offset;
+    const tag = query.tag;
 
     const rs = await BlogList.findAllBlog(offset, limit);
     return new SuccessResponse('findAll', rs).send(res);

@@ -5,7 +5,7 @@ import { isEmpty } from '@utils/util';
 import { BlogServiceVariable } from './index';
 
 export default class BlogList {
-  static async findAllBlog(offset: number, limit: number): Promise<Record<string, unknown>> {
+  static async findAllBlog(offset: number, limit: number, tag: string): Promise<Record<string, unknown>> {
     const queryRs: Blog[] = await BlogModel
       .find({ status: true, isPublished: true })
       .select('+text')
