@@ -1,5 +1,6 @@
 import Tag from '@/models/tags.model';
-import { ArrayMaxSize, ArrayMinSize, IsInt, IsNumber, IsString, Max, MaxLength, Min, MinLength } from 'class-validator';
+import { ArrayMaxSize, ArrayMinSize, IsInt, IsNumber, isString, IsString, Max, MaxLength, Min, MinLength } from 'class-validator';
+import { PaginationQuery } from './pagination.dto';
 
 export class CreateBlogDto {
   @IsString()
@@ -34,10 +35,10 @@ export class CreateBlogDto {
   @ArrayMaxSize(5)
   @MinLength(3, { each: true, message: 'Tag is too short. Minimal length is $value characters' })
   @MaxLength(50, { each: true, message: 'Tag is too long. Maximal length is $value characters' })
-  tags?: Tag[];
+  tags?: string[];
 }
 
-export class CreateBlogDto1 {
+export class BlogPagination extends PaginationQuery  {
   @IsString()
-  public name: string;
+  public tag?: string;
 }

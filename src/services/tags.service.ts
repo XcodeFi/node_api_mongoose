@@ -7,7 +7,7 @@ class TagService {
   public tags = TagModel;
 
   public async findAllTag(): Promise<Tag[]> {
-    const tags: Tag[] = await this.tags.find();
+    const tags: Tag[] = await this.tags.find({});
     return tags;
   }
 

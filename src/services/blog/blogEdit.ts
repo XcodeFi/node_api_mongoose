@@ -33,27 +33,98 @@ export default class BlogEdit {
     const createBlogData: Blog = await BlogModel.create(blog);
 
     Promise.all(
-      blogData.tags.map(async (t: Tag) => {
-        const tagAdd = await TagModel.findOneAndUpdate({ name: t.name }, { name: t.name }, { upsert: true }).lean();
+      blogData.tags.map(async (tag_name: string) => {
+        const tagAdd = await TagModel.findOneAndUpdate({ name: tag_name }, { name: tag_name }, 
+          {
+            new: true,
+            upsert: true // Make this update into an upsert
+          });
 
-        await BlogModel.findByIdAndUpdate(createBlogData._id, { $push: { tags: tagAdd._id } }, { new: true });
-
-        await TagModel.findByIdAndUpdate(tagAdd._id, { $push: { blogs: createBlogData._id } }, { new: true });
+        if (tagAdd){
+          await BlogModel.findByIdAndUpdate(createBlogData._id, { $push: { tags: tagAdd._id } }, { new: true });
+          await TagModel.findByIdAndUpdate(tagAdd._id, { $push: { blogs: createBlogData._id } }, { new: true });
+        }
       }),
     );
 
     return createBlogData;
   }
 
-  static async updateBlog(blogUrl: string, blogData: CreateBlogDto, req: any): Promise<Blog> {
-    if (isEmpty(blogData)) throw new BadRequestError("You're not blogData");
+  static async updateBlog(blogUrl: string, editData: CreateBlogDto, req: any): Promise<Blog> {
+    if (isEmpty(editData)) throw new BadRequestError("You're not blogData");
 
-    const findBlog: Blog = await blogList.findUrlIfExists(blogData.blogUrl);
+    const findBlog: Blog = await blogList.findUrlIfExists(editData.blogUrl);
     if (!findBlog) throw new BadRequestError('Blog with this url not exists');
 
     if (!(findBlog.author as User)._id === req.user._id) throw new ForbiddenError("You don't have necessary permissions");
 
-    const updateBlogById: Blog = await BlogModel.findByIdAndUpdate(findBlog._id, blogData).lean();
+    const updateBlogById: Blog = await BlogModel.findByIdAndUpdate(findBlog._id, {
+      title: editData.title,
+      description: editData.description,
+      text: editData.text,
+      updatedBy: (req.user as User),
+      blogUrl: editData.blogUrl,
+      imgUrl: editData.imgUrl,
+      score: editData.score,
+      updatedAt: new Date(),
+    }, {new: true}).populate('tags').lean();
+
+    const editTags = editData.tags;
+    const oldTags = updateBlogById.tags.map(t => t.name);
+
+    const inA_not_B = (a: string[], b: string[])=>{
+      const rs = {};
+
+      a.forEach(t=>{
+          rs[t] = t;
+      })
+
+      b.forEach(t=>{
+        if(rs[t])
+          rs[t] = null
+      });
+
+      return Object.values(rs).filter(t=>t);
+    }
+
+    const deleteTags = inA_not_B(oldTags, editTags);
+    const newTags = inA_not_B(editTags, oldTags);
+
+    Promise.all(
+      deleteTags.map(async (tag_name: string) => {
+          const tagFind: Tag = await TagModel.findOne({name: tag_name});
+
+          await BlogModel.findByIdAndUpdate(updateBlogById._id, { $pull: { tags: tagFind._id } }, { new: true });
+          await TagModel.findByIdAndUpdate(tagFind._id, { $pull: { blogs: updateBlogById._id } }, { new: true });
+      }),
+    );
+
+    Promise.all(
+      newTags.map(async (tag_name: string) => {
+
+        const tagFind = await TagModel.findOneAndUpdate({ name: tag_name }, { name: tag_name }, 
+          {
+              new: true,
+              upsert: true // Make this update into an upsert
+          });
+
+        if (tagFind){
+          await BlogModel.findByIdAndUpdate(updateBlogById._id, { $push: { tags: tagFind._id } }, { new: true });
+          await TagModel.findByIdAndUpdate(tagFind._id, { $push: { blogs: updateBlogById._id } }, { new: true });
+        }
+      }),
+    );
+
+    Promise.all(
+      editTags.map(async (tag_name: string) => {
+        const tagAdd = await TagModel.findOneAndUpdate({ name: tag_name }, { name: tag_name }, 
+        {
+            new: true,
+            upsert: true // Make this update into an upsert
+        });
+      }),
+    );
+
 
     if (!updateBlogById) throw new HttpException(409, "You're not blog");
 
@@ -86,6 +157,7 @@ export default class BlogEdit {
     const now = new Date();
 
     await BlogModel.deleteMany({}).exec();
+    await TagModel.deleteMany({}).exec();
 
     return blogDrags;
   }

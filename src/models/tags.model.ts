@@ -1,5 +1,9 @@
 import { model, Schema, Document } from 'mongoose';
 import Blog from './blog.model';
+
+export const DOCUMENT_NAME = 'Tag';
+export const COLLECTION_NAME = 'tags';
+
 export default interface Tag {
   _id: string;
   name: string;
@@ -22,4 +26,4 @@ const tagSchema: Schema = new Schema({
   ],
 });
 
-export const TagModel = model<Tag & Document>('Tag', tagSchema);
+export const TagModel = model<Tag & Document>(DOCUMENT_NAME, tagSchema, COLLECTION_NAME);
