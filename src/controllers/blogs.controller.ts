@@ -21,7 +21,7 @@ export class BlogsController {
     const offset = query.offset;
     const tag = query.tag;
 
-    const rs = await BlogList.findAllBlog(offset, limit);
+    const rs = await BlogList.findAllBlog(offset, limit, tag);
     return new SuccessResponse('findAll', rs).send(res);
   }
 

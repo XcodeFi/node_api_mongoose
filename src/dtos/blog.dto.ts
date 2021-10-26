@@ -1,5 +1,5 @@
 import Tag from '@/models/tags.model';
-import { ArrayMaxSize, ArrayMinSize, IsInt, IsNumber, isString, IsString, Max, MaxLength, Min, MinLength } from 'class-validator';
+import { ArrayMaxSize, ArrayMinSize, IsInt, IsNumber, IsOptional, isString, IsString, Max, MaxLength, Min, MinLength } from 'class-validator';
 import { PaginationQuery } from './pagination.dto';
 
 export class CreateBlogDto {
@@ -40,5 +40,6 @@ export class CreateBlogDto {
 
 export class BlogPagination extends PaginationQuery  {
   @IsString()
+  @IsOptional()
   public tag?: string;
 }
