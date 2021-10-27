@@ -1,20 +1,22 @@
 import Blog, { BlogModel } from '@/models/blog.model';
+import { TagModel } from '@/models/tags.model';
 import User from '@/models/users.model';
 import { HttpException } from '@exceptions/HttpException';
 import { isEmpty } from '@utils/util';
+import { Aggregate, Types } from 'mongoose';
 import { BlogServiceVariable } from './index';
 
-export default class BlogList {
+export class BlogList {
   static async findAllBlog(offset: number, limit: number, tag: string): Promise<Record<string, unknown>> {
     const filter: Record<string, unknown> = {
       status: true,
-      isPublished: true 
-    }
+      isPublished: true,
+    };
 
-    const query = await BlogModel.where(filter);
+    if (tag) {
+      const tagId = await TagModel.findOne({ name: tag });
 
-    if (tag){
-      filter['tags.name'] = tag; 
+      filter['tags'] = new Types.ObjectId(tagId._id);
     }
 
     const queryRs: Blog[] = await BlogModel.find(filter)

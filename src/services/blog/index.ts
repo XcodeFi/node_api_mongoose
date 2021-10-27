@@ -1,4 +1,5 @@
-export default class BlogServiceNew {}
+export * from './blogEdit';
+export * from './blogList';
 
 export class BlogServiceVariable {
   static AUTHOR_DETAIL = 'email profilePicUrl';

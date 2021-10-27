@@ -9,8 +9,7 @@ import { RequestWithUser } from '@/interfaces/auth.interface';
 import User from '@/models/users.model';
 import { SuccessMsgResponse, SuccessResponse } from '@/utils/ApiResponse';
 import { BadRequestError } from '@/utils/ApiError';
-import BlogList from '@/services/blog/blogList';
-import BlogEdit from '@/services/blog/blogEdit';
+import { BlogList, BlogEdit } from '@/services/blog';
 
 @JsonController()
 export class BlogsController {
@@ -79,7 +78,6 @@ export class BlogsController {
   @UseBefore(modelValidationMiddleware(CreateBlogDto, ValidationSource.BODY, true))
   @OpenAPI({ summary: 'Update a blog' })
   async updateBlog(@Res() res: any, @Param('slug') blogUrl: string, @Body() blogData: CreateBlogDto, @Req() req: any) {
-
     const updateBlogData: Blog = await BlogEdit.updateBlog(blogUrl, blogData, req);
     return new SuccessResponse('Blog updated successfully', updateBlogData).send(res);
   }
