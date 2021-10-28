@@ -20,7 +20,8 @@ export default class CommentService {
     const comment: Comments = await CommentModel.create({
       author: user,
       body,
-      blog: article._id
+      blog: article._id,
+      createdAt: new Date()
     });
 
     await BlogModel.findOneAndUpdate({ blogUrl: blogSlug }, { $push: { comments: comment._id } });
@@ -31,9 +32,7 @@ export default class CommentService {
   static async findByBlogUrl(blogSlug: string): Promise<Comments[]> {
     const article = await BlogList.findByUrl(blogSlug);
 
-    const articleId = new Types.ObjectId(article._id);
-
-    const comments = await CommentModel.find({ blog: articleId })
+    const comments = await CommentModel.find({ blog: article._id })
       .populate('author', ColumnDefine.AUTHOR_DETAIL)
       .lean<Comments[]>()
       .exec();
@@ -44,18 +43,15 @@ export default class CommentService {
   static async deleteComment(blogSlug: string, user: User, commentId: string): Promise<boolean> {
     const article = await BlogList.findByUrl(blogSlug);
 
-    const comment_id= new Types.ObjectId(commentId);
+    const comment_id = new Types.ObjectId(commentId);
 
-    const articleId = new Types.ObjectId(article._id);
+    var rs = await CommentModel.deleteOne({ _id: comment_id });
 
-    await CommentModel.deleteOne({ _id: comment_id });
-    await BlogModel.updateOne(
-      {
-        _id: articleId,
-      },
+    await BlogModel.findByIdAndUpdate(
+      article._id,
       {
         $pull: {
-          comments: { author: user, _id: comment_id },
+          comments: { _id: comment_id },
         },
       },
     );

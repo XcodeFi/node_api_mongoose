@@ -12,6 +12,7 @@ import { SuccessMsgResponse, SuccessResponse } from '@/utils/ApiResponse';
 import { BadRequestError } from '@/utils/ApiError';
 import { BlogList, BlogEdit } from '@/services/blog';
 import CommentService from '@/services/comment.service';
+import FavoriteService from '@/services/favorite.service';
 
 @JsonController()
 export class BlogsController {
@@ -37,7 +38,7 @@ export class BlogsController {
     return new SuccessResponse('findByUrl', blog).send(res);
   }
 
-  
+
 
   @Get('/blogs/:id')
   @OpenAPI({ summary: 'Return find a blog' })
@@ -94,6 +95,7 @@ export class BlogsController {
   }
 
   //#region comment region
+
   @Get('/blogs/:slug/comments')
   @OpenAPI({ summary: 'Return find a blog' })
   async getBlogComments(@Param('slug') slug: string, @Req() req: any, @Res() res: any) {
@@ -114,14 +116,29 @@ export class BlogsController {
 
     return new SuccessResponse('add comment', commentRs).send(res);
   }
-  
+
   @Delete('/blogs/:slug/comments/:commentid')
   @UseBefore(authMiddleware)
   @OpenAPI({ summary: 'Delete a blog' })
   async deleteCommentInBlog(@Param('slug') blogUrl: string, @Param('commentid') commentid: string, @Res() res: any, @Req() req: any) {
-    const deleteData: Comments = await CommentService.deleteComment(blogUrl, req.user as User, commentid);
+    const deleteData = await CommentService.deleteComment(blogUrl, req.user as User, commentid);
     return new SuccessResponse('deleted', deleteData).send(res);
   }
+
+  //#endregion
+
+  //#region favorite
+  @Post('/blogs/:slug/favorite')
+  @UseBefore(authMiddleware)
+  @OpenAPI({ summary: 'Favorite blog' })
+  async addFavorite(@Param('slug') slug: string, @Req() req: RequestWithUser, @Res() res: any) {
+    const userData: User = req.user;
+
+    const blog: Blog = await FavoriteService.addArticleToFavorite(slug, userData);
+
+    return new SuccessResponse('add comment', blog).send(res);
+  }
+
 
   //#endregion
 }

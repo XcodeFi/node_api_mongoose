@@ -5,13 +5,12 @@ import User from './users.model';
 export const DOCUMENT_NAME = 'Comment';
 export const COLLECTION_NAME = 'comments';
 
-export default interface Comments {
-  _id: string;
-  body: string;
-  author: User | string;
+export default interface Comments extends Document {
+  body: string,
+  author: User | string,
   blog: Blog | string,
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt?: Date,
+  updatedAt?: Date,
 }
 
 const commentSchema: Schema = new Schema({
@@ -39,13 +38,14 @@ const commentSchema: Schema = new Schema({
     type: Date,
     select: true,
   }
-}).pre<Comments>('save', function(next) {
-  if (this._id) {
-    this.updatedAt = new Date();
-  } else {
-    this.createdAt = new Date();
-  }
-  next();
 });
+// .pre<Comments>('save', function(next) {
+//   if (this._id) {
+//     this.updatedAt = new Date();
+//   } else {
+//     this.createdAt = new Date();
+//   }
+//   next();
+// });
 
-export const CommentModel = model<Comments & Document>(DOCUMENT_NAME, commentSchema, COLLECTION_NAME);
+export const CommentModel = model<Comments>(DOCUMENT_NAME, commentSchema, COLLECTION_NAME);
