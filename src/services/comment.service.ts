@@ -41,15 +41,21 @@ export default class CommentService {
     return comments;
   }
 
-  static async deleteComment(commentId: ObjectId, user: User, articleId: ObjectId): Promise<boolean> {
-    await CommentModel.deleteOne({ _id: commentId });
+  static async deleteComment(blogSlug: string, user: User, commentId: string): Promise<boolean> {
+    const article = await BlogList.findByUrl(blogSlug);
+
+    const comment_id= new Types.ObjectId(commentId);
+
+    const articleId = new Types.ObjectId(article._id);
+
+    await CommentModel.deleteOne({ _id: comment_id });
     await BlogModel.updateOne(
       {
         _id: articleId,
       },
       {
         $pull: {
-          comments: { author: user, _id: commentId },
+          comments: { author: user, _id: comment_id },
         },
       },
     );
