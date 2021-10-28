@@ -115,5 +115,13 @@ export class BlogsController {
     return new SuccessResponse('add comment', commentRs).send(res);
   }
   
+  @Delete('/blogs/:slug/comments/:commentid')
+  @UseBefore(authMiddleware)
+  @OpenAPI({ summary: 'Delete a blog' })
+  async deleteCommentInBlog(@Param('slug') blogUrl: string, @Param('commentid') commentid: string, @Res() res: any, @Req() req: any) {
+    const deleteData: Comments = await CommentService.deleteComment(blogUrl, req.user as User, commentid);
+    return new SuccessResponse('deleted', deleteData).send(res);
+  }
+
   //#endregion
 }
