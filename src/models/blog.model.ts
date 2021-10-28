@@ -11,6 +11,7 @@ export default interface Blog extends Document {
   text?: string;
   draftText?: string;
   tags?: Tag[] | string[];
+  comments?: Comment[] | string[];
   author: User | string;
   imgUrl?: string;
   blogUrl: string;
@@ -55,6 +56,14 @@ const schema = new Schema(
       {
         type: Schema.Types.ObjectId,
         ref: 'Tag',
+        required: false,
+        index: true,
+      },
+    ],
+    comments: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Comment',
         required: false,
         index: true,
       },

@@ -23,6 +23,15 @@ class UserService {
     return findUser;
   }
 
+  public async findUserByEmail(email: string): Promise<User> {
+    if (isEmpty(email)) throw new HttpException(400, "You're not userId");
+
+    const findUser: User = await this.users.findOne({ email: email });
+    if (!findUser) throw new HttpException(409, "You're not user");
+
+    return findUser;
+  }
+
   public async createUser(userData: CreateUserDto): Promise<User> {
     if (isEmpty(userData)) throw new BadRequestResponse("You're not userData");
 

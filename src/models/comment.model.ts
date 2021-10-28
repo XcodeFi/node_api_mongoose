@@ -6,24 +6,46 @@ export const DOCUMENT_NAME = 'Comment';
 export const COLLECTION_NAME = 'comments';
 
 export default interface Comments {
+  _id: string;
   body: string;
-  author?: User | string;
+  author: User | string;
+  blog: Blog | string,
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 const commentSchema: Schema = new Schema({
   body: {
     type: String,
     required: true,
-    unique: true,
   },
-  author: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-      index: true,
-    },
-  ],
+  author: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+    index: true,
+  },
+  blog: {
+    type: Schema.Types.ObjectId,
+    ref: 'Blog',
+    required: true,
+    index: true,
+  },
+  createdAt: {
+    type: Date,
+    select: true,
+  },
+  updatedAt: {
+    type: Date,
+    select: true,
+  }
+}).pre<Comments>('save', function(next) {
+  if (this._id) {
+    this.updatedAt = new Date();
+  } else {
+    this.createdAt = new Date();
+  }
+  next();
 });
 
-export const commentModel = model<Comments & Document>(DOCUMENT_NAME, commentSchema, COLLECTION_NAME);
+export const CommentModel = model<Comments & Document>(DOCUMENT_NAME, commentSchema, COLLECTION_NAME);

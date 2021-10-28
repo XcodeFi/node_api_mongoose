@@ -8,42 +8,42 @@ import { HttpException } from '@exceptions/HttpException';
 import { DataStoredInToken, TokenData } from '@interfaces/auth.interface';
 import User, { UserModel } from '@models/users.model';
 import { isEmpty } from '@utils/util';
-import { ObjectId } from 'mongoose';
-import { commentModel } from '@/models/comment.model';
+import { ObjectId, Types } from 'mongoose';
+import { BlogModel } from '@/models/blog.model';
+import Comments, { CommentModel } from '@/models/comment.model';
+import { ColumnDefine } from './ColumnDefine';
 
 export default class CommentService {
-  public users = UserModel;
-
-  async addComment(
-    blogSlug: string,
-    body: string,
-    user: User,
-  ): Promise<Comment> {
+  static async addComment(blogSlug: string, body: string, user: User): Promise<Comments> {
     const article = await BlogList.findByUrl(blogSlug);
-    
-    const comment = new commentModel({
+
+    const comment: Comments = await CommentModel.create({
       author: user,
       body,
+      blog: article._id
     });
 
-    const newComment: Comment = await comment.save();
+    await BlogModel.findOneAndUpdate({ blogUrl: blogSlug }, { $push: { comments: comment._id } });
 
-
-    article.comments.push(newComment);
-    await (article as ArticleDocument).save();
-    await this.pubSub.publish(COMMENT_ADDED_EVENT, {
-      commentAdded: newComment,
-    });
-    return newComment;
+    return comment;
   }
 
-  async deleteComment(
-    commentId: ObjectId,
-    user: User,
-    articleId: ObjectId,
-  ): Promise<boolean> {
-    await this.commentModel.deleteOne({ _id: commentId });
-    await this.articleModel.updateOne(
+  static async findByBlogUrl(blogSlug: string): Promise<Comments[]> {
+    const article = await BlogList.findByUrl(blogSlug);
+
+    const articleId = new Types.ObjectId(article._id);
+
+    const comments = await CommentModel.find({ blog: articleId })
+      .populate('author', ColumnDefine.AUTHOR_DETAIL)
+      .lean<Comments[]>()
+      .exec();
+
+    return comments;
+  }
+
+  static async deleteComment(commentId: ObjectId, user: User, articleId: ObjectId): Promise<boolean> {
+    await CommentModel.deleteOne({ _id: commentId });
+    await BlogModel.updateOne(
       {
         _id: articleId,
       },
@@ -53,6 +53,7 @@ export default class CommentService {
         },
       },
     );
+
     return true;
   }
 }

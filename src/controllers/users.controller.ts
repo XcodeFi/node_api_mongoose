@@ -1,3 +1,4 @@
+import { SuccessResponse } from '@/utils/ApiResponse';
 import { Param, Body, Get, Post, Put, Delete, HttpCode, UseBefore, JsonController, Res } from 'routing-controllers';
 import { OpenAPI } from 'routing-controllers-openapi';
 import { CreateUserDto } from '@dtos/users.dto';
@@ -5,7 +6,7 @@ import userService from '@services/users.service';
 import { validationMiddleware } from '@middlewares/validation.middleware';
 import { Response } from 'express';
 import User from '@/models/users.model';
-@JsonController()
+@JsonController('/profiles')
 export class UsersController {
   public userService = new userService();
   // constructor(private userService: userService) {}
@@ -14,18 +15,25 @@ export class UsersController {
    * Retrieves the details of an existing user.
    * Supply the unique user ID from either and receive corresponding user details.
    */
-  @Get('/users')
+  @Get()
   @OpenAPI({ summary: 'Return a list of users' })
   async getUsers(@Res() res: Response) {
     const findAllUsersData: User[] = await this.userService.findAllUser();
     return res.status(200).json({ data: findAllUsersData, message: 'findAll' });
   }
 
-  @Get('/users/:id')
+  // @Get('/:id')
+  // @OpenAPI({ summary: 'Return find a user' })
+  // async getUserById(@Param('id') userId: string, @Res() res: Response) {
+  //   const findOneUserData: User = await this.userService.findUserById(userId);
+  //   return res.json({ data: findOneUserData, message: 'findOne' });
+  // }
+
+  @Get('/:email')
   @OpenAPI({ summary: 'Return find a user' })
-  async getUserById(@Param('id') userId: string, @Res() res: Response) {
-    const findOneUserData: User = await this.userService.findUserById(userId);
-    return res.json({ data: findOneUserData, message: 'findOne' });
+  async getUserByEmail(@Param('email') email: string, @Res() res: Response) {
+    const findOneUserData: User = await this.userService.findUserByEmail(email);
+    return new SuccessResponse("findbyEmail",{ profile: findOneUserData}).send(res);
   }
 
   @Post('/users')

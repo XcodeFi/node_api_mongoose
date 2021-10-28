@@ -43,3 +43,9 @@ export class BlogPagination extends PaginationQuery  {
   @IsOptional()
   public tag?: string;
 }
+
+export class CreateCommentDto {
+  @IsString()
+  @MaxLength(50000)
+  body: string;
+}

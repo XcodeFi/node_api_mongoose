@@ -1,6 +1,7 @@
+import Comments from '@/models/comment.model';
 import { ValidationSource } from './../enums/validation-source';
 import { modelValidationMiddleware } from './../middlewares/modelValidation.middleware';
-import { BlogPagination, CreateBlogDto } from '@dtos/blog.dto';
+import { BlogPagination, CreateBlogDto, CreateCommentDto } from '@dtos/blog.dto';
 import { Get, Req, Body, Post, UseBefore, Res, Put, Delete, Param, JsonController, QueryParams } from 'routing-controllers';
 import { OpenAPI } from 'routing-controllers-openapi';
 import Blog from '@/models/blog.model';
@@ -10,6 +11,7 @@ import User from '@/models/users.model';
 import { SuccessMsgResponse, SuccessResponse } from '@/utils/ApiResponse';
 import { BadRequestError } from '@/utils/ApiError';
 import { BlogList, BlogEdit } from '@/services/blog';
+import CommentService from '@/services/comment.service';
 
 @JsonController()
 export class BlogsController {
@@ -35,14 +37,7 @@ export class BlogsController {
     return new SuccessResponse('findByUrl', blog).send(res);
   }
 
-  @Get('/blogs/:slug/comments')
-  @OpenAPI({ summary: 'Return find a blog' })
-  async getBlogComments(@Param('slug') slug: string, @Req() req: any, @Res() res: any) {
-    const blogUrl: string = slug;
-    // const findOneBlogData: Blog = await this.blogService.findByUrl(blogUrl);
-
-    return new SuccessResponse('findByUrl', []).send(res);
-  }
+  
 
   @Get('/blogs/:id')
   @OpenAPI({ summary: 'Return find a blog' })
@@ -97,4 +92,28 @@ export class BlogsController {
     const deleteBlogData: Blog[] = await BlogEdit.deleteAllBlog(req.user);
     return new SuccessResponse('deleted', deleteBlogData).send(res);
   }
+
+  //#region comment region
+  @Get('/blogs/:slug/comments')
+  @OpenAPI({ summary: 'Return find a blog' })
+  async getBlogComments(@Param('slug') slug: string, @Req() req: any, @Res() res: any) {
+    const blogUrl: string = slug;
+    const comments: Comments[] = await CommentService.findByBlogUrl(blogUrl);
+
+    return new SuccessResponse('findByBlogUrl', comments).send(res);
+  }
+
+  @Post('/blogs/:slug/comments')
+  @UseBefore(authMiddleware)
+  @UseBefore(modelValidationMiddleware(CreateCommentDto, ValidationSource.BODY, true))
+  @OpenAPI({ summary: 'Create a new blog' })
+  async addComment(@Body() commentDto: CreateCommentDto, @Param('slug') slug: string, @Req() req: RequestWithUser, @Res() res: any) {
+    const userData: User = req.user;
+
+    const commentRs: Comments = await CommentService.addComment(slug, commentDto.body, userData);
+
+    return new SuccessResponse('add comment', commentRs).send(res);
+  }
+  
+  //#endregion
 }
