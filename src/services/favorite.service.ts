@@ -21,12 +21,16 @@ export default class FavoriteService {
       throw new BadRequestError("not found");
     }
 
-    const blog: Blog = await BlogModel.findOneAndUpdate({ blogUrl: blogSlug }, { $push: { favoritedUsers: user._id } }).lean<Blog>();
+    const blog: Blog = await BlogModel.findOneAndUpdate({ blogUrl: blogSlug }, { $push: { favoritedUsers: user._id } }, { new: true })
+      .populate('author', ColumnDefine.AUTHOR_DETAIL)
+      .populate('favoritedUsers', ColumnDefine.AUTHOR_DETAIL)
+      .populate('tags', ColumnDefine.TAG)
+      .lean<Blog>();
 
     return blog;
   }
 
-  static async deleteArticleFromFavorite(blogSlug: string, user: User) {
+  static async deleteArticleFromFavorite(blogSlug: string, user: User): Promise<Blog> {
 
     const article = await BlogList.findByUrl(blogSlug);
 
@@ -34,18 +38,19 @@ export default class FavoriteService {
       throw new BadRequestError("not found");
     }
 
-    await BlogModel
-      .updateOne(
-        {
-          _id: article._id,
-        },
+    const rs = await BlogModel
+      .findByIdAndUpdate(article._id,
         {
           $pull: { favoritedUsers: user._id },
         },
+        { new: true }
       )
-      .exec();
+      .populate('author', ColumnDefine.AUTHOR_DETAIL)
+      .populate('favoritedUsers', ColumnDefine.AUTHOR_DETAIL)
+      .populate('tags', ColumnDefine.TAG)
+      .lean<Blog>()
 
-    return true;
+    return rs;
   }
 
   async isArticlesFavoriteByUser(
@@ -54,8 +59,7 @@ export default class FavoriteService {
   ): Promise<boolean[]> {
     const articles = await BlogModel.find({ _id: { $in: { articleIds } } });
     return articles.map((article) =>
-      !article.favoritedUsers ? false : !!article.favoritedUsers.find(u => u._id.toString() === user._id.toString())
+      !article.favoritedUsers ? false : !!(article.favoritedUsers as User[]).find(u => u._id.toString() === user._id.toString())
     )
-
   }
 }
