@@ -38,8 +38,6 @@ export class BlogsController {
     return new SuccessResponse('findByUrl', blog).send(res);
   }
 
-
-
   @Get('/blogs/:id')
   @OpenAPI({ summary: 'Return find a blog' })
   async getBlogById(@Param('id') id: string, @Req() req: any, @Res() res: any) {
@@ -120,8 +118,8 @@ export class BlogsController {
   @Delete('/blogs/:slug/comments/:commentid')
   @UseBefore(authMiddleware)
   @OpenAPI({ summary: 'Delete a blog' })
-  async deleteCommentInBlog(@Param('slug') blogUrl: string, @Param('commentid') commentid: string, @Res() res: any, @Req() req: any) {
-    const deleteData = await CommentService.deleteComment(blogUrl, req.user as User, commentid);
+  async deleteCommentInBlog(@Param('slug') blogUrl: string, @Param('commentid') commentId: string, @Res() res: any, @Req() req: any) {
+    const deleteData = await CommentService.deleteComment(blogUrl, req.user as User, commentId);
     return new SuccessResponse('deleted', deleteData).send(res);
   }
 
@@ -135,8 +133,33 @@ export class BlogsController {
     const userData: User = req.user;
 
     const blog: Blog = await FavoriteService.addArticleToFavorite(slug, userData);
+    const blogViewModel = {
+      ...blog,
+      favorited: (blog.favoritedUsers as User[]).find(
+        (t) => t.email === userData.email
+      ) != null,
+      favoritesCount:blog.favoritedUsers.length
+    }
 
-    return new SuccessResponse('add comment', blog).send(res);
+    return new SuccessResponse('add comment', blogViewModel).send(res);
+  }
+
+  @Delete('/blogs/:slug/favorite')
+  @UseBefore(authMiddleware)
+  @OpenAPI({ summary: 'UnFavorite blog' })
+  async unFavorite(@Param('slug') slug: string, @Req() req: RequestWithUser, @Res() res: any) {
+    const userData: User = req.user;
+
+    const blog = await FavoriteService.deleteArticleFromFavorite(slug, userData);
+    const blogViewModel = {
+      ...blog,
+      favorited: (blog.favoritedUsers as User[]).find(
+        (t) => t.email === userData.email
+      ) != null,
+      favoritesCount:blog.favoritedUsers.length
+    }
+
+    return new SuccessResponse('add comment', blogViewModel).send(res);
   }
 
 

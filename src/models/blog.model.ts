@@ -67,6 +67,7 @@ const schema = new Schema(
         ref: 'User',
         required: false,
         index: true,
+        unique: true,
       },
     ],
     comments: [

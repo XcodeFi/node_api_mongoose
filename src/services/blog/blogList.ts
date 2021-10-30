@@ -105,6 +105,7 @@ export class BlogList {
     return BlogModel.findOne({ blogUrl: blogUrl, status: true })
       .select('+text +draftText')
       .populate('author', BlogServiceVariable.AUTHOR_DETAIL)
+      .populate('favoritedUsers', BlogServiceVariable.AUTHOR_DETAIL)
       .populate('tags', BlogServiceVariable.TAG)
       .lean<Blog>()
       .exec();
