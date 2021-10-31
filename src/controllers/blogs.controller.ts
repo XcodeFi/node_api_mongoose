@@ -13,14 +13,16 @@ import { BadRequestError } from '@/utils/ApiError';
 import { BlogList, BlogEdit } from '@/services/blog';
 import CommentService from '@/services/comment.service';
 import FavoriteService from '@/services/favorite.service';
+import getAuthInfoMiddleware from '@/middlewares/getAuthInfo.middleware';
 
 @JsonController('/blogs')
 export class BlogsController {
   @Get()
+  @UseBefore(getAuthInfoMiddleware)
   @OpenAPI({ summary: 'Return a list of blogs' })
   async getBlogs(@Req() req: any, @Res() res: any, @QueryParams() query: BlogPagination) {
 
-    const rs = await BlogList.findAllBlog(query);
+    const rs = await BlogList.findAllBlog(query, req.user as User);
     return new SuccessResponse('findAll', rs).send(res);
   }
 

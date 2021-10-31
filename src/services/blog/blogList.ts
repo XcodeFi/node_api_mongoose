@@ -9,7 +9,7 @@ import { BlogServiceVariable } from './index';
 import { BlogPagination } from '@/dtos/blog.dto';
 
 export class BlogList {
-  static async findAllBlog({offset, limit, tag, favorited, author} : BlogPagination): Promise<Record<string, unknown>> {
+  static async findAllBlog({offset, limit, tag, favorited, author} : BlogPagination, userInfo: User = null): Promise<Record<string, unknown>> {
     const filter: Record<string, unknown> = {
       status: true,
       isPublished: true,
@@ -46,10 +46,16 @@ export class BlogList {
     const rsViewModel = queryRs.map(t => {
 
       const favoritesCount = t.favoritedUsers.length;
+      let favorited = false;
+
+      if (userInfo){
+        favorited = t.favoritedUsers.findIndex(u => u == userInfo._id) != -1;
+      }
 
       return {
         ...t,
-        favoritesCount
+        favoritesCount,
+        favorited
       }
     })
 
