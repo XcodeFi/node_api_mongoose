@@ -14,20 +14,32 @@ import { BlogList, BlogEdit } from '@/services/blog';
 import CommentService from '@/services/comment.service';
 import FavoriteService from '@/services/favorite.service';
 
-@JsonController()
+@JsonController('/blogs')
 export class BlogsController {
-  @Get('/blogs')
+  @Get()
   @OpenAPI({ summary: 'Return a list of blogs' })
   async getBlogs(@Req() req: any, @Res() res: any, @QueryParams() query: BlogPagination) {
     const limit = query.limit;
     const offset = query.offset;
     const tag = query.tag;
+    const favorited = query.favorited;
 
-    const rs = await BlogList.findAllBlog(offset, limit, tag);
+    const rs = await BlogList.findAllBlog(offset, limit, tag, favorited);
     return new SuccessResponse('findAll', rs).send(res);
   }
 
-  @Get('/blogs/:slug')
+  @Get('/feed')
+  @OpenAPI({ summary: 'Return a list of blog feed' })
+  async getBlogsFeed(@Req() req: any, @Res() res: any, @QueryParams() query: BlogPagination) {
+    const limit = query.limit;
+    const offset = query.offset;
+    const tag = query.tag;
+
+    const rs = await BlogList.findAllBlog(offset, limit, tag, null);
+    return new SuccessResponse('blog feed', rs).send(res);
+  }
+
+  @Get('/:slug')
   @OpenAPI({ summary: 'Return find a blog' })
   async getBlogByUrl(@Param('slug') slug: string, @Req() req: any, @Res() res: any) {
     const blogUrl: string = slug;
@@ -38,7 +50,7 @@ export class BlogsController {
     return new SuccessResponse('findByUrl', blog).send(res);
   }
 
-  @Get('/blogs/:id')
+  @Get('/:id')
   @OpenAPI({ summary: 'Return find a blog' })
   async getBlogById(@Param('id') id: string, @Req() req: any, @Res() res: any) {
     const blogId: string = id;
@@ -47,7 +59,7 @@ export class BlogsController {
     return new SuccessResponse('findOne', findOneBlogData).send(res);
   }
 
-  @Post('/blogs')
+  @Post()
   @UseBefore(authMiddleware)
   @UseBefore(modelValidationMiddleware(CreateBlogDto, ValidationSource.BODY, true))
   @OpenAPI({ summary: 'Create a new blog' })
@@ -59,7 +71,7 @@ export class BlogsController {
     return new SuccessResponse('created', createBlogData).send(res);
   }
 
-  @Put('/blogs/publish-all')
+  @Put('/publish-all')
   @UseBefore(authMiddleware)
   @OpenAPI({ summary: 'publish all blog' })
   async publishAll(@Res() res: any, @Req() req: any) {
@@ -67,7 +79,7 @@ export class BlogsController {
     return new SuccessMsgResponse('Blog published successfully').send(res);
   }
 
-  @Put('/blogs/:slug')
+  @Put('/:slug')
   @UseBefore(authMiddleware)
   @UseBefore(modelValidationMiddleware(CreateBlogDto, ValidationSource.BODY, true))
   @OpenAPI({ summary: 'Update a blog' })
@@ -76,7 +88,7 @@ export class BlogsController {
     return new SuccessResponse('Blog updated successfully', updateBlogData).send(res);
   }
 
-  @Delete('/blogs/:slug')
+  @Delete('/:slug')
   @UseBefore(authMiddleware)
   @OpenAPI({ summary: 'Delete a blog' })
   async deleteBlog(@Param('slug') blogUrl: string, @Res() res: any, @Req() req: any) {
@@ -84,7 +96,7 @@ export class BlogsController {
     return new SuccessResponse('deleted', deleteBlogData).send(res);
   }
 
-  @Delete('/blogs')
+  @Delete()
   @UseBefore(authMiddleware)
   @OpenAPI({ summary: 'Delete all blog' })
   async deleteAllBlog(@Res() res: any, @Req() req: any) {
@@ -94,7 +106,7 @@ export class BlogsController {
 
   //#region comment region
 
-  @Get('/blogs/:slug/comments')
+  @Get('/:slug/comments')
   @OpenAPI({ summary: 'Return find a blog' })
   async getBlogComments(@Param('slug') slug: string, @Req() req: any, @Res() res: any) {
     const blogUrl: string = slug;
@@ -103,7 +115,7 @@ export class BlogsController {
     return new SuccessResponse('findByBlogUrl', comments).send(res);
   }
 
-  @Post('/blogs/:slug/comments')
+  @Post('/:slug/comments')
   @UseBefore(authMiddleware)
   @UseBefore(modelValidationMiddleware(CreateCommentDto, ValidationSource.BODY, true))
   @OpenAPI({ summary: 'Create a new blog' })
@@ -115,7 +127,7 @@ export class BlogsController {
     return new SuccessResponse('add comment', commentRs).send(res);
   }
 
-  @Delete('/blogs/:slug/comments/:commentid')
+  @Delete('/:slug/comments/:commentid')
   @UseBefore(authMiddleware)
   @OpenAPI({ summary: 'Delete a blog' })
   async deleteCommentInBlog(@Param('slug') blogUrl: string, @Param('commentid') commentId: string, @Res() res: any, @Req() req: any) {
@@ -126,7 +138,7 @@ export class BlogsController {
   //#endregion
 
   //#region favorite
-  @Post('/blogs/:slug/favorite')
+  @Post('/:slug/favorite')
   @UseBefore(authMiddleware)
   @OpenAPI({ summary: 'Favorite blog' })
   async addFavorite(@Param('slug') slug: string, @Req() req: RequestWithUser, @Res() res: any) {
@@ -144,7 +156,7 @@ export class BlogsController {
     return new SuccessResponse('add comment', blogViewModel).send(res);
   }
 
-  @Delete('/blogs/:slug/favorite')
+  @Delete('/:slug/favorite')
   @UseBefore(authMiddleware)
   @OpenAPI({ summary: 'UnFavorite blog' })
   async unFavorite(@Param('slug') slug: string, @Req() req: RequestWithUser, @Res() res: any) {

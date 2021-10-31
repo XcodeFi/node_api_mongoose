@@ -1,3 +1,4 @@
+import { UserModel } from './../../models/users.model';
 import Blog, { BlogModel } from '@/models/blog.model';
 import { TagModel } from '@/models/tags.model';
 import User from '@/models/users.model';
@@ -7,7 +8,7 @@ import { Aggregate, Types } from 'mongoose';
 import { BlogServiceVariable } from './index';
 
 export class BlogList {
-  static async findAllBlog(offset: number, limit: number, tag: string): Promise<Record<string, unknown>> {
+  static async findAllBlog(offset: number, limit: number, tag: string, favorite: string = null): Promise<Record<string, unknown>> {
     const filter: Record<string, unknown> = {
       status: true,
       isPublished: true,
@@ -19,12 +20,19 @@ export class BlogList {
       filter['tags'] = new Types.ObjectId(tagId._id);
     }
 
+    if (favorite) {
+      const userId = await UserModel.findOne({ email: favorite });
+
+      filter['favoritedUsers'] = new Types.ObjectId(userId._id);
+    }
+
     const queryRs: Blog[] = await BlogModel.find(filter)
       .select('+text')
       .skip(offset)
       .limit(limit)
       .populate('author', BlogServiceVariable.AUTHOR_DETAIL)
       .populate('tags', BlogServiceVariable.TAG)
+      .populate('favoritedUsers', BlogServiceVariable.AUTHOR_DETAIL)
       .sort({ publishedAt: -1 })
       .lean<Blog[]>()
       .exec();
