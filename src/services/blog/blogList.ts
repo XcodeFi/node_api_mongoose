@@ -6,9 +6,10 @@ import { HttpException } from '@exceptions/HttpException';
 import { isEmpty } from '@utils/util';
 import { Aggregate, Types } from 'mongoose';
 import { BlogServiceVariable } from './index';
+import { BlogPagination } from '@/dtos/blog.dto';
 
 export class BlogList {
-  static async findAllBlog(offset: number, limit: number, tag: string, favorite: string = null): Promise<Record<string, unknown>> {
+  static async findAllBlog({offset, limit, tag, favorited, author} : BlogPagination): Promise<Record<string, unknown>> {
     const filter: Record<string, unknown> = {
       status: true,
       isPublished: true,
@@ -16,14 +17,17 @@ export class BlogList {
 
     if (tag) {
       const tagId = await TagModel.findOne({ name: tag });
-
       filter['tags'] = new Types.ObjectId(tagId._id);
     }
 
-    if (favorite) {
-      const userId = await UserModel.findOne({ email: favorite });
-
+    if (favorited) {
+      const userId = await UserModel.findOne({ email: favorited });
       filter['favoritedUsers'] = new Types.ObjectId(userId._id);
+    }
+
+    if (author) {
+      const authorId = await UserModel.findOne({ email: author });
+      filter['author'] = new Types.ObjectId(authorId._id);
     }
 
     const queryRs: Blog[] = await BlogModel.find(filter)
@@ -39,20 +43,20 @@ export class BlogList {
 
     const countRs = await BlogModel.find(filter).count();
 
+    const rsViewModel = queryRs.map(t => {
+
+      const favoritesCount = t.favoritedUsers.length;
+
+      return {
+        ...t,
+        favoritesCount
+      }
+    })
+
     return {
-      articles: queryRs,
+      articles: rsViewModel,
       articlesCount: countRs,
     };
-  }
-
-  static async findLatestBlogs(offset: number, limit: number): Promise<Blog[]> {
-    return await BlogModel.find({ status: true, isPublished: true })
-      .skip(offset)
-      .limit(limit)
-      .populate('author', BlogServiceVariable.AUTHOR_DETAIL)
-      .sort({ publishedAt: -1 })
-      .lean<Blog[]>()
-      .exec();
   }
 
   static async findBlogById(blogId: string): Promise<Blog> {
