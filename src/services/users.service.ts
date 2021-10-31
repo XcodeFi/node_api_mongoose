@@ -1,3 +1,4 @@
+import { ColumnDefine } from './ColumnDefine';
 import { BadRequestResponse } from './../utils/ApiResponse';
 import { BadRequestError } from './../utils/ApiError';
 import bcrypt from 'bcrypt';
@@ -26,7 +27,7 @@ class UserService {
   public async findUserByEmail(email: string): Promise<User> {
     if (isEmpty(email)) throw new HttpException(400, "You're not userId");
 
-    const findUser: User = await this.users.findOne({ email: email });
+    const findUser: User = await this.users.findOne({ email: email }).select(ColumnDefine.AUTHOR_DETAIL).lean<User>().exec();
     if (!findUser) throw new HttpException(409, "You're not user");
 
     return findUser;

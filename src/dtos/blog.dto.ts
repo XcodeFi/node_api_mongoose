@@ -46,6 +46,10 @@ export class BlogPagination extends PaginationQuery  {
   @IsString()
   @IsOptional()
   public favorited?: string; // user's email
+
+  @IsString()
+  @IsOptional()
+  public author?: string; // user's email
 }
 
 export class CreateCommentDto {

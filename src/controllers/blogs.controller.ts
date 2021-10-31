@@ -19,23 +19,16 @@ export class BlogsController {
   @Get()
   @OpenAPI({ summary: 'Return a list of blogs' })
   async getBlogs(@Req() req: any, @Res() res: any, @QueryParams() query: BlogPagination) {
-    const limit = query.limit;
-    const offset = query.offset;
-    const tag = query.tag;
-    const favorited = query.favorited;
 
-    const rs = await BlogList.findAllBlog(offset, limit, tag, favorited);
+    const rs = await BlogList.findAllBlog(query);
     return new SuccessResponse('findAll', rs).send(res);
   }
 
   @Get('/feed')
   @OpenAPI({ summary: 'Return a list of blog feed' })
   async getBlogsFeed(@Req() req: any, @Res() res: any, @QueryParams() query: BlogPagination) {
-    const limit = query.limit;
-    const offset = query.offset;
-    const tag = query.tag;
 
-    const rs = await BlogList.findAllBlog(offset, limit, tag, null);
+    const rs = await BlogList.findAllBlog(query);
     return new SuccessResponse('blog feed', rs).send(res);
   }
 

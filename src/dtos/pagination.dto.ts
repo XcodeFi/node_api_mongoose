@@ -4,9 +4,9 @@ export class PaginationQuery {
   @IsNumber()
   @IsOptional()
   @IsPositive()
-  public limit?: number;
+  public limit?: number = 10;
 
   @IsNumber()
   @IsOptional()
-  public offset?: number;
+  public offset?: number = 0;
 }
