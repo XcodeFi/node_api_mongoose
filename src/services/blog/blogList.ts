@@ -49,7 +49,7 @@ export class BlogList {
       let favorited = false;
 
       if (userInfo){
-        favorited = t.favoritedUsers.findIndex(u => u == userInfo._id) != -1;
+        favorited = t.favoritedUsers.findIndex(u => u.email == userInfo.email) != -1;
       }
 
       return {

@@ -59,6 +59,7 @@ const schema = new Schema(
         ref: 'Tag',
         required: false,
         index: true,
+        unique: true,
       },
     ],
     favoritedUsers: [
@@ -67,7 +68,6 @@ const schema = new Schema(
         ref: 'User',
         required: false,
         index: true,
-        unique: true,
       },
     ],
     comments: [
